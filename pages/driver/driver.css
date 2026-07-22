@@ -1,0 +1,693 @@
+/* ================================================================
+   DRIVER.CSS - Driver Page Specific Styles
+   Based on Figma Make (shadcn/ui) design system
+   Colors: Primary #D3C5F6, Secondary #3B2A60
+   ================================================================ */
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+    background: linear-gradient(145deg, #3B2A60 0%, #1F1433 100%);
+    padding: 20px 24px 24px;
+    color: #FFFFFF;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.page-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.driver-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(211, 197, 246, 0.15);
+    border: 2px solid rgba(211, 197, 246, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.driver-info h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.driver-info p {
+    font-size: 14px;
+    opacity: 0.6;
+    margin: 0;
+}
+
+.driver-info p i {
+    margin-right: 6px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* ===== STATUS BADGE ===== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px 6px 12px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-badge .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-badge.online {
+    background: rgba(43, 138, 62, 0.15);
+    color: #2B8A3E;
+}
+
+.status-badge.online .status-dot {
+    background: #2B8A3E;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.status-badge.offline {
+    background: rgba(108, 117, 125, 0.15);
+    color: #6C757D;
+}
+
+.status-badge.offline .status-dot {
+    background: #6C757D;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #6C757D;
+    border-radius: 26px;
+    transition: 0.3s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    transition: 0.3s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: #2B8A3E;
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+}
+
+/* ===== NOTIFICATION BANNER ===== */
+.notification-banner {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-left: 4px solid #D3C5F6;
+    border-radius: 0 12px 12px 0;
+    padding: 12px 20px;
+    margin: -12px auto 0;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.notification-banner.hidden {
+    display: none;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    flex-wrap: wrap;
+}
+
+.notification-content i:first-child {
+    color: #D3C5F6;
+    font-size: 18px;
+}
+
+.notification-location {
+    color: #6C757D;
+    font-size: 13px;
+    background: #F8F9FA;
+    padding: 2px 12px;
+    border-radius: 100px;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #6C757D;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.notification-close:hover {
+    color: #C92A2A;
+}
+
+/* ===== CONTAINER ===== */
+.driver-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+/* ===== ASSIGNMENT CARD ===== */
+.assignment-card {
+    grid-column: 1 / 2;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.assignment-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #D3C5F6;
+}
+
+.assignment-card .card-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+.assignment-card .card-header h2 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+/* ===== PASSENGER RIDE GROUP ===== */
+.passenger-ride-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.passenger-ride {
+    background: #F8F9FA;
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.passenger-ride-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.passenger-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+/* ===== ROUTE DETAILS ===== */
+.route-details {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.route-stop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.route-stop i {
+    font-size: 14px;
+    color: #6C757D;
+    width: 18px;
+    text-align: center;
+}
+
+.route-stop.pickup i {
+    color: #2B8A3E;
+}
+
+.route-stop.dropoff i {
+    color: #E85D04;
+}
+
+.route-stop span {
+    font-size: 14px;
+    color: #1A1A2E;
+}
+
+.route-stop .route-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6C757D;
+    display: block;
+}
+
+.route-arrow {
+    color: #D3C5F6;
+    font-size: 14px;
+    padding: 0 4px;
+}
+
+/* ===== ASSIGNMENT SUMMARY ===== */
+.assignment-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 16px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6C757D;
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+.summary-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+/* ===== ASSIGNMENT ACTIONS ===== */
+.assignment-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.assignment-actions .btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 100px;
+}
+
+.assignment-actions .btn-outline {
+    flex: 0.7;
+}
+
+.assignment-actions .btn-danger {
+    flex: 0.5;
+}
+
+/* ===== DELIVERY DETAILS ===== */
+.delivery-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.delivery-package {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #F0EDF5;
+    border-radius: 12px;
+}
+
+.package-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #D3C5F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #3B2A60;
+}
+
+.package-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3B2A60;
+    margin: 0;
+}
+
+.package-info p {
+    font-size: 13px;
+    color: #6C757D;
+    margin: 0;
+}
+
+/* ===== ROUTE MAP CARD ===== */
+.route-map-card {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.route-map-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #D3C5F6;
+}
+
+.route-map-card .card-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+.route-map-card .card-header h2 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+#routeMap {
+    height: 220px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #E9ECEF;
+    margin-bottom: 16px;
+}
+
+/* ===== ROUTE STOPS ===== */
+.route-stops {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.route-stop-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.route-stop-item:hover {
+    background: #F8F9FA;
+}
+
+.route-stop-item.active {
+    background: #F0EDF5;
+    border-left: 3px solid #D3C5F6;
+}
+
+.stop-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #D3C5F6;
+    color: #3B2A60;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.route-stop-item.active .stop-number {
+    background: #3B2A60;
+    color: #FFFFFF;
+}
+
+.stop-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #3B2A60;
+    width: 80px;
+}
+
+.stop-location {
+    font-size: 13px;
+    color: #6C757D;
+}
+
+/* ===== EARNINGS SUMMARY ===== */
+.earnings-summary {
+    grid-column: 1 / 3;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px 28px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.earnings-summary .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #D3C5F6;
+}
+
+.earnings-summary .card-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+.earnings-summary .card-header h2 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+.earnings-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.earning-item {
+    text-align: center;
+    padding: 8px;
+}
+
+.earning-label {
+    display: block;
+    font-size: 12px;
+    color: #6C757D;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.earning-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #3B2A60;
+    margin-top: 4px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+    .driver-container {
+        grid-template-columns: 1fr;
+    }
+    .assignment-card {
+        grid-column: 1;
+    }
+    .route-map-card {
+        grid-column: 1;
+        grid-row: auto;
+    }
+    .earnings-summary {
+        grid-column: 1;
+    }
+    .earnings-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 700px) {
+    .page-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .header-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .notification-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px;
+        margin-top: 0;
+    }
+    .notification-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .notification-actions {
+        justify-content: flex-start;
+    }
+    .notification-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+    }
+    .assignment-card {
+        padding: 16px 16px 20px;
+    }
+    .route-map-card {
+        padding: 16px 16px 20px;
+    }
+    .earnings-summary {
+        padding: 16px 16px 20px;
+    }
+    .route-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .route-arrow i {
+        transform: rotate(90deg);
+    }
+    .assignment-actions {
+        flex-direction: column;
+    }
+    .assignment-actions .btn {
+        flex: 1;
+    }
+    .assignment-actions .btn-outline,
+    .assignment-actions .btn-danger {
+        flex: 1;
+    }
+    .earnings-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .earning-value {
+        font-size: 20px;
+    }
+    .assignment-summary {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .summary-divider {
+        display: none;
+    }
+    .summary-item {
+        flex: 1;
+        min-width: 60px;
+    }
+}
+
+@media (max-width: 400px) {
+    .earnings-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .route-stop-item {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .stop-label {
+        width: auto;
+    }
+}

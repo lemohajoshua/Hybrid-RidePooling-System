@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulation Dashboard - RidePool+</title>
+    <meta name="description" content="Real-time simulation dashboard for ride-pooling and delivery optimisation in Owerri's urban-rural transport network." />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <!-- Page Specific Styles -->
+    <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-car-side"></i>
+                <span>Ride<span>Pool</span>+</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../landing/index.html">Home</a></li>
+                <li><a href="../dashboard/index.html" class="active">Dashboard</a></li>
+                <li><a href="../passenger/index.html">Passenger</a></li>
+                <li><a href="../driver/index.html">Driver</a></li>
+                <li><a href="../admin/index.html">Admin</a></li>
+            </ul>
+            <a href="../dashboard/index.html" class="btn btn-primary btn-nav">Launch Simulation</a>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== DASHBOARD HEADER ===== -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h2><i class="fas fa-tachometer-alt"></i> Simulation Dashboard</h2>
+            <div class="header-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span>Step: <strong id="stepCounter">0</strong></span>
+                <span class="status-separator">|</span>
+                <span>System: <strong id="systemStatus">Ready</strong></span>
+            </div>
+        </div>
+        <div class="header-controls">
+            <button id="btnInit" class="btn btn-secondary btn-sm">Initialize</button>
+            <button id="btnStep" class="btn btn-primary btn-sm" disabled>Step</button>
+            <button id="btnRun" class="btn btn-primary btn-sm" disabled>Run 10 Steps</button>
+            <button id="btnReset" class="btn btn-outline btn-sm" disabled>Reset</button>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD LAYOUT ===== -->
+    <div class="dashboard-layout">
+
+        <!-- LEFT: MAP -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="legend">
+                <span><span class="dot blue"></span> Driver</span>
+                <span><span class="dot green"></span> Passenger (Urban)</span>
+                <span><span class="dot orange"></span> Passenger (Rural)</span>
+                <span><span class="dot red"></span> Delivery Pickup</span>
+                <span><span class="dot purple"></span> Route</span>
+            </div>
+        </div>
+
+        <!-- RIGHT: PANEL -->
+        <div class="panel">
+
+            <div class="panel-section">
+                <h3><i class="fas fa-sliders-h"></i> Simulation Controls</h3>
+                <div class="btn-group">
+                    <button id="btnInit" class="btn btn-secondary">Initialize</button>
+                    <button id="btnStep" class="btn btn-primary" disabled>Step</button>
+                    <button id="btnRun" class="btn btn-primary" disabled>Run 10 Steps</button>
+                    <button id="btnReset" class="btn btn-outline" disabled>Reset</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3><i class="fas fa-chart-bar"></i> Performance Metrics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Deadhead Reduction</div>
+                        <div class="stat-value positive" id="statDeadhead">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Driver Income</div>
+                        <div class="stat-value" id="statIncome">₦0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Passenger Cost</div>
+                        <div class="stat-value negative" id="statCost">₦0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Delivery Completion</div>
+                        <div class="stat-value positive" id="statDelivery">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3><i class="fas fa-list-ul"></i> Activity Log</h3>
+                <div class="log-box" id="logBox">
+                    <div class="log-entry">▶️ System ready. Click <strong>Initialize</strong> to start.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 RidePool+ &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System &bull; Owerri Case Study</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet.js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <!-- Global JavaScript -->
+    <script src="../../assets/js/main.js"></script>
+    <!-- Page Specific JavaScript -->
+    <script src="dashboard.js"></script>
+</body>
+</html>

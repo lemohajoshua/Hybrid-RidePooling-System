@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Delivery - RidePool+</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <link rel="stylesheet" href="delivery.css" />
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-car-side"></i>
+                <span>Ride<span>Pool</span>+</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../landing/index.html">Home</a></li>
+                <li><a href="../dashboard/index.html">Dashboard</a></li>
+                <li><a href="../passenger/index.html">Passenger</a></li>
+                <li><a href="../driver/index.html">Driver</a></li>
+                <li><a href="../delivery/index.html" class="active">Send Delivery</a></li>
+                <li><a href="../admin/index.html">Admin</a></li>
+                <li><a href="../auth/login.html" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Sign In</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div>
+                <h1><i class="fas fa-pen-alt"></i> Create Delivery Task</h1>
+                <p>Send parcels, packages, and goods across Owerri's urban-rural network</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-badge">
+                    <span class="stat-number" id="totalDeliveries">0</span>
+                    <span class="stat-label">Total Sent</span>
+                </div>
+                <div class="stat-badge pending">
+                    <span class="stat-number" id="pendingDeliveries">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+                <div class="stat-badge in-progress">
+                    <span class="stat-number" id="inProgressDeliveries">0</span>
+                    <span class="stat-label">In Progress</span>
+                </div>
+                <div class="stat-badge completed">
+                    <span class="stat-number" id="completedDeliveries">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="delivery-container">
+
+        <!-- ===== CREATE DELIVERY FORM ===== -->
+        <div class="create-delivery-card card">
+            <div class="card-header">
+                <h2><i class="fas fa-plus-circle"></i> New Delivery Request</h2>
+                <span class="badge badge-primary">Est. Fee: <span id="estimatedFee">₦0</span></span>
+            </div>
+
+            <form id="deliveryForm" class="delivery-form">
+                <!-- Step 1: Pickup Details -->
+                <div class="form-step">
+                    <h3><i class="fas fa-store"></i> Pickup Details</h3>
+                    <div class="form-group">
+                        <label for="pickupAddress">Pickup Address</label>
+                        <input type="text" id="pickupAddress" placeholder="Enter pickup address (e.g., Obinze Market)" required />
+                        <small class="form-hint"><i class="fas fa-info-circle"></i> Click on the map to set exact pickup location</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupInstructions">Pickup Instructions (Optional)</label>
+                        <input type="text" id="pickupInstructions" placeholder="e.g., Call upon arrival, ring doorbell" />
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Step 2: Dropoff Details -->
+                <div class="form-step">
+                    <h3><i class="fas fa-flag-checkered"></i> Dropoff Details</h3>
+                    <div class="form-group">
+                        <label for="dropoffAddress">Dropoff Address</label>
+                        <input type="text" id="dropoffAddress" placeholder="Enter dropoff address (e.g., World Bank Estate)" required />
+                        <small class="form-hint"><i class="fas fa-info-circle"></i> Click on the map to set exact dropoff location</small>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Step 3: Package Details -->
+                <div class="form-step">
+                    <h3><i class="fas fa-box"></i> Package Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="packageType">Package Type</label>
+                            <select id="packageType" required>
+                                <option value="">Select type...</option>
+                                <option value="small">Small (≤ 2kg)</option>
+                                <option value="medium">Medium (2-5kg)</option>
+                                <option value="large">Large (5-10kg)</option>
+                                <option value="extra">Extra Large (10-20kg)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="packageWeight">Weight (kg)</label>
+                            <input type="number" id="packageWeight" placeholder="e.g., 2.5" min="0.1" step="0.1" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="packageDescription">Package Description (Optional)</label>
+                        <textarea id="packageDescription" rows="2" placeholder="Describe the package (e.g., fragile, perishable, electronics...)"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Step 4: Time Window -->
+                <div class="form-step">
+                    <h3><i class="fas fa-clock"></i> Time Window</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pickupWindowStart">Pickup Window Start</label>
+                            <input type="datetime-local" id="pickupWindowStart" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="pickupWindowEnd">Pickup Window End</label>
+                            <input type="datetime-local" id="pickupWindowEnd" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoffDeadline">Dropoff Deadline</label>
+                        <input type="datetime-local" id="dropoffDeadline" required />
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Step 5: Sender Details -->
+                <div class="form-step">
+                    <h3><i class="fas fa-user"></i> Your Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="senderName">Your Name</label>
+                            <input type="text" id="senderName" placeholder="Full name" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="senderPhone">Phone Number</label>
+                            <input type="tel" id="senderPhone" placeholder="+234 800 000 0000" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg btn-full">
+                        <i class="fas fa-paper-plane"></i> Post Delivery Request
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== MAP SIDEBAR ===== -->
+        <div class="delivery-map-sidebar">
+            <!-- Map -->
+            <div class="map-card">
+                <div class="map-header">
+                    <h3><i class="fas fa-map"></i> Delivery Map</h3>
+                    <span class="badge badge-primary">Click to set location</span>
+                </div>
+                <div id="deliveryMap"></div>
+                <div class="map-legend">
+                    <span><span class="legend-dot pickup"></span> Pickup</span>
+                    <span><span class="legend-dot dropoff"></span> Dropoff</span>
+                    <span><span class="legend-dot route"></span> Route</span>
+                </div>
+            </div>
+
+            <!-- Estimated Fee -->
+            <div class="fee-estimate-card card">
+                <h3><i class="fas fa-calculator"></i> Fee Estimate</h3>
+                <div class="fee-breakdown">
+                    <div class="fee-row">
+                        <span>Base Fee</span>
+                        <span>₦500</span>
+                    </div>
+                    <div class="fee-row">
+                        <span>Distance</span>
+                        <span id="feeDistance">0 km</span>
+                    </div>
+                    <div class="fee-row">
+                        <span>Package Size</span>
+                        <span id="feeSize">Small</span>
+                    </div>
+                    <div class="fee-row total">
+                        <span>Total Estimated Fee</span>
+                        <span id="feeTotal">₦500</span>
+                    </div>
+                </div>
+                <p class="fee-note">
+                    <i class="fas fa-info-circle"></i> Final fee may vary based on demand and availability
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== MY DELIVERIES SECTION ===== -->
+    <section class="my-deliveries-section">
+        <div class="my-deliveries-header">
+            <h2><i class="fas fa-history"></i> My Deliveries</h2>
+            <div class="delivery-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="assigned">Assigned</button>
+                <button class="filter-btn" data-filter="picked_up">Picked Up</button>
+                <button class="filter-btn" data-filter="delivered">Delivered</button>
+            </div>
+        </div>
+
+        <div class="my-deliveries-list" id="myDeliveriesList">
+            <!-- Deliveries will be dynamically added here -->
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-box-open"></i>
+                <h3>No deliveries yet</h3>
+                <p>Create your first delivery task using the form above</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 RidePool+ &bull; Delivery Management &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet.js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <!-- Global JavaScript -->
+    <script src="../../assets/js/main.js"></script>
+    <!-- Page Specific JavaScript -->
+    <script src="delivery.js"></script>
+</body>
+</html>

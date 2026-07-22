@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Passenger - RidePool+</title>
+    <meta name="description" content="Request a ride and find ride-pooling options in Owerri's urban-rural transport network." />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <!-- Page Specific Styles -->
+    <link rel="stylesheet" href="passenger.css" />
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-car-side"></i>
+                <span>Ride<span>Pool</span>+</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../landing/index.html">Home</a></li>
+                <li><a href="../dashboard/index.html">Dashboard</a></li>
+                <li><a href="../passenger/index.html" class="active">Passenger</a></li>
+                <li><a href="../driver/index.html">Driver</a></li>
+                <li><a href="../admin/index.html">Admin</a></li>
+                <li><a href="../delivery/index.html">Deliveries</a></li>
+            </ul>
+            <a href="../dashboard/index.html" class="btn btn-primary btn-nav">Launch Simulation</a>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1><i class="fas fa-user"></i> Request a Ride</h1>
+            <p>Find ride-pooling options and save up to 30% on your journey</p>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="passenger-container">
+
+        <!-- ===== RIDE REQUEST FORM ===== -->
+        <div class="ride-request-card card">
+            <div class="card-header">
+                <h2><i class="fas fa-route"></i> Where are you going?</h2>
+            </div>
+
+            <!-- Step 1: Locations -->
+            <div class="form-step">
+                <div class="form-group">
+                    <label for="pickup"><i class="fas fa-map-pin"></i> Pickup Location</label>
+                    <input type="text" id="pickup" placeholder="Enter pickup address or select on map" value="FUTO Gate, Owerri" />
+                </div>
+                <div class="form-group">
+                    <label for="destination"><i class="fas fa-flag-checkered"></i> Destination</label>
+                    <input type="text" id="destination" placeholder="Enter destination address" value="World Bank Housing Estate" />
+                </div>
+                <button class="btn btn-outline btn-sm">
+                    <i class="fas fa-location-dot"></i> Use Current Location
+                </button>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Step 2: Time -->
+            <div class="form-step">
+                <h3><i class="fas fa-clock"></i> When do you need to go?</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" value="2026-07-20" />
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Time</label>
+                        <input type="time" id="time" value="09:30" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Step 3: Ride Options -->
+            <div class="form-step">
+                <h3><i class="fas fa-car"></i> Ride Options</h3>
+                <div class="ride-toggle-group">
+                    <button class="ride-toggle" id="soloToggle">
+                        <i class="fas fa-user"></i> Solo Ride
+                    </button>
+                    <button class="ride-toggle active" id="poolToggle">
+                        <i class="fas fa-users"></i> Pooled Ride
+                        <span class="badge badge-success">Save 30%</span>
+                    </button>
+                </div>
+                <p class="ride-info" id="rideInfo">
+                    <i class="fas fa-info-circle"></i> Pooled rides save up to 30% on fare and help reduce traffic congestion.
+                </p>
+            </div>
+
+            <button class="btn btn-primary btn-lg btn-full" id="findRideBtn">
+                <i class="fas fa-search"></i> Find My Ride
+            </button>
+        </div>
+
+        <!-- ===== RIDE-POOLING MATCH RESULTS ===== -->
+        <div class="match-results card" id="matchResults" style="display: none;">
+            <div class="match-header">
+                <div class="match-badge">
+                    <i class="fas fa-check-circle"></i> We found a match!
+                </div>
+                <button class="btn btn-outline btn-sm" id="closeMatch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="match-content">
+                <div class="passenger-comparison">
+                    <div class="passenger-card">
+                        <div class="passenger-avatar">
+                            <span>🧑</span>
+                        </div>
+                        <div class="passenger-details">
+                            <h4>You</h4>
+                            <p><i class="fas fa-map-pin"></i> FUTO Gate</p>
+                            <p><i class="fas fa-flag-checkered"></i> World Bank</p>
+                        </div>
+                    </div>
+                    <div class="match-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Pooling</span>
+                    </div>
+                    <div class="passenger-card">
+                        <div class="passenger-avatar">
+                            <span>👨‍💼</span>
+                        </div>
+                        <div class="passenger-details">
+                            <h4>Michael O. <span class="badge badge-primary">Matched</span></h4>
+                            <p><i class="fas fa-map-pin"></i> Concorde Hotel</p>
+                            <p><i class="fas fa-flag-checkered"></i> World Bank</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="savings-box">
+                    <div class="savings-amount">
+                        <span class="savings-label">You save</span>
+                        <span class="savings-value">₦540</span>
+                        <span class="savings-percent">(30%)</span>
+                    </div>
+                    <div class="savings-detail">
+                        <span>Solo fare: ₦1,800</span>
+                        <span>Pooled fare: ₦1,260</span>
+                    </div>
+                </div>
+
+                <div class="match-actions">
+                    <button class="btn btn-success btn-lg">
+                        <i class="fas fa-check"></i> Confirm Pooled Ride
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-undo"></i> Find Another
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RECENT RIDES ===== -->
+        <div class="recent-rides card">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> Your Recent Rides</h2>
+                <span class="badge badge-primary">3 trips</span>
+            </div>
+
+            <div class="ride-history">
+                <div class="history-item">
+                    <div class="history-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="history-details">
+                        <div class="history-route">FUTO Gate → World Bank</div>
+                        <div class="history-meta">
+                            <span><i class="far fa-calendar"></i> Jul 19, 2026</span>
+                            <span><i class="far fa-clock"></i> 10:30 AM</span>
+                            <span class="badge badge-success">Completed</span>
+                        </div>
+                    </div>
+                    <div class="history-cost">₦1,260</div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="history-details">
+                        <div class="history-route">Concorde Hotel → Obinze</div>
+                        <div class="history-meta">
+                            <span><i class="far fa-calendar"></i> Jul 18, 2026</span>
+                            <span><i class="far fa-clock"></i> 04:15 PM</span>
+                            <span class="badge badge-success">Completed</span>
+                            <span class="badge badge-primary">Pooled</span>
+                        </div>
+                    </div>
+                    <div class="history-cost">₦1,480</div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="history-details">
+                        <div class="history-route">World Bank → Ihiagwa</div>
+                        <div class="history-meta">
+                            <span><i class="far fa-calendar"></i> Jul 17, 2026</span>
+                            <span><i class="far fa-clock"></i> 08:00 AM</span>
+                            <span class="badge badge-warning">Cancelled</span>
+                        </div>
+                    </div>
+                    <div class="history-cost">—</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 RidePool+ &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System &bull; Owerri Case Study</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global JavaScript -->
+    <script src="../../assets/js/main.js"></script>
+    <!-- Page Specific JavaScript -->
+    <script src="passenger.js"></script>
+</body>
+</html>

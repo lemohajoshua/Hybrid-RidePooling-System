@@ -1,0 +1,631 @@
+/* ================================================================
+   DELIVERY.CSS - Delivery Page (Sender View) Specific Styles
+   Based on Figma Make (shadcn/ui) design system
+   Colors: Primary #D3C5F6, Secondary #3B2A60
+   ================================================================ */
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+    background: linear-gradient(145deg, #3B2A60 0%, #1F1433 100%);
+    padding: 24px 24px 28px;
+    color: #FFFFFF;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.page-header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-header-content h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.page-header-content h1 i {
+    color: #D3C5F6;
+    margin-right: 10px;
+}
+
+.page-header-content p {
+    font-size: 14px;
+    opacity: 0.7;
+    margin: 0;
+}
+
+.header-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.stat-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 8px 16px;
+    text-align: center;
+    min-width: 60px;
+}
+
+.stat-badge .stat-number {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.stat-badge .stat-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    letter-spacing: 0.5px;
+}
+
+.stat-badge.pending .stat-number { color: #E85D04; }
+.stat-badge.in-progress .stat-number { color: #D3C5F6; }
+.stat-badge.completed .stat-number { color: #2B8A3E; }
+
+/* ===== DELIVERY CONTAINER ===== */
+.delivery-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+}
+
+/* ===== CREATE DELIVERY CARD ===== */
+.create-delivery-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 28px 32px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.create-delivery-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #D3C5F6;
+}
+
+.create-delivery-card .card-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+.create-delivery-card .card-header h2 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+.delivery-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-step h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #3B2A60;
+    margin-bottom: 12px;
+}
+
+.form-step h3 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+.form-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+    margin: 4px 0;
+}
+
+.delivery-form .form-group {
+    margin-bottom: 12px;
+}
+
+.delivery-form .form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #3B2A60;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.delivery-form .form-group label i {
+    color: #D3C5F6;
+    margin-right: 4px;
+}
+
+.delivery-form .form-group input,
+.delivery-form .form-group select,
+.delivery-form .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #F8F9FA;
+    transition: all 0.2s;
+}
+
+.delivery-form .form-group input:focus,
+.delivery-form .form-group select:focus,
+.delivery-form .form-group textarea:focus {
+    outline: none;
+    border-color: #D3C5F6;
+    box-shadow: 0 0 0 3px rgba(211, 197, 246, 0.2);
+    background: #FFFFFF;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-actions {
+    margin-top: 8px;
+}
+
+.btn-full {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 16px;
+}
+
+/* ===== MAP SIDEBAR ===== */
+.delivery-map-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.map-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.map-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3B2A60;
+    margin: 0;
+}
+
+.map-header h3 i {
+    margin-right: 8px;
+}
+
+#deliveryMap {
+    height: 280px;
+    width: 100%;
+    background: #E9ECEF;
+}
+
+.map-legend {
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #6C757D;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.legend-dot.pickup {
+    background: #2B8A3E;
+}
+.legend-dot.dropoff {
+    background: #E85D04;
+}
+.legend-dot.route {
+    background: #7B2FBE;
+}
+
+/* ===== FEE ESTIMATE CARD ===== */
+.fee-estimate-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.fee-estimate-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3B2A60;
+    margin: 0 0 12px 0;
+}
+
+.fee-estimate-card h3 i {
+    margin-right: 8px;
+}
+
+.fee-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fee-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #6C757D;
+    padding: 4px 0;
+}
+
+.fee-row.total {
+    font-weight: 700;
+    color: #3B2A60;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding-top: 8px;
+    margin-top: 4px;
+    font-size: 15px;
+}
+
+.fee-row.total span:last-child {
+    color: #2B8A3E;
+}
+
+.fee-note {
+    font-size: 12px;
+    color: #6C757D;
+    margin: 8px 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ===== MY DELIVERIES SECTION ===== */
+.my-deliveries-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+}
+
+.my-deliveries-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.my-deliveries-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3B2A60;
+}
+
+.my-deliveries-header h2 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+.delivery-filters {
+    display: flex;
+    gap: 4px;
+}
+
+.delivery-filters .filter-btn {
+    padding: 4px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: #6C757D;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.delivery-filters .filter-btn:hover {
+    color: #3B2A60;
+}
+
+.delivery-filters .filter-btn.active {
+    background: #D3C5F6;
+    color: #3B2A60;
+}
+
+/* ===== MY DELIVERIES LIST ===== */
+.my-deliveries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.delivery-item {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 14px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.delivery-item:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-color: #D3C5F6;
+}
+
+.delivery-item.hidden {
+    display: none;
+}
+
+.delivery-status {
+    display: flex;
+    align-items: center;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: #E85D0420;
+    color: #E85D04;
+}
+
+.status-badge.assigned {
+    background: #D3C5F620;
+    color: #7B2FBE;
+}
+
+.status-badge.picked_up {
+    background: #2B8A3E20;
+    color: #2B8A3E;
+}
+
+.status-badge.delivered {
+    background: #2B8A3E20;
+    color: #2B8A3E;
+}
+
+.delivery-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.delivery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.delivery-header h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3B2A60;
+    margin: 0;
+}
+
+.delivery-header .delivery-id {
+    font-size: 12px;
+    color: #6C757D;
+    font-weight: 400;
+}
+
+.delivery-route {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #1A1A2E;
+}
+
+.delivery-route .route-point {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.delivery-route .route-point i {
+    font-size: 12px;
+}
+
+.delivery-route .route-point.pickup i {
+    color: #2B8A3E;
+}
+
+.delivery-route .route-point.dropoff i {
+    color: #E85D04;
+}
+
+.delivery-route .route-arrow {
+    color: #D3C5F6;
+}
+
+.delivery-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #6C757D;
+    margin-top: 4px;
+}
+
+.delivery-meta i {
+    margin-right: 4px;
+}
+
+.delivery-meta .driver-name {
+    color: #3B2A60;
+    font-weight: 500;
+}
+
+.delivery-actions .btn {
+    font-size: 12px;
+    padding: 4px 14px;
+}
+
+.delivery-actions .btn-cancel {
+    background: transparent;
+    color: #C92A2A;
+    border: 1px solid #C92A2A;
+}
+
+.delivery-actions .btn-cancel:hover {
+    background: #C92A2A;
+    color: #FFFFFF;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #D3C5F6;
+    margin-bottom: 12px;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    color: #3B2A60;
+    margin-bottom: 4px;
+}
+
+.empty-state p {
+    color: #6C757D;
+    font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .delivery-container {
+        grid-template-columns: 1fr;
+    }
+    .delivery-map-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .my-deliveries-section {
+        padding: 0 16px 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .create-delivery-card {
+        padding: 20px 16px;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .delivery-map-sidebar {
+        grid-template-columns: 1fr;
+    }
+    .delivery-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+    .delivery-route {
+        flex-wrap: wrap;
+    }
+    .delivery-actions {
+        display: flex;
+        gap: 6px;
+    }
+    .my-deliveries-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .delivery-filters {
+        flex-wrap: wrap;
+    }
+    #deliveryMap {
+        height: 200px;
+    }
+    .stat-badge {
+        padding: 4px 10px;
+        min-width: 50px;
+    }
+    .stat-badge .stat-number {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 500px) {
+    .delivery-container {
+        padding: 12px;
+    }
+    .create-delivery-card {
+        padding: 16px 12px;
+    }
+    .delivery-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .header-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .fee-breakdown .fee-row {
+        font-size: 12px;
+    }
+}

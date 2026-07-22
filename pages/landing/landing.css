@@ -1,0 +1,420 @@
+/* ================================================================
+   LANDING.CSS - Landing Page Specific Styles
+   Based on Figma Make design with shadcn/ui styling
+   ================================================================ */
+
+/* ===== HERO SECTION ===== */
+.hero {
+    padding: 48px 24px 64px;
+    background: linear-gradient(145deg, #3B2A60 0%, #1F1433 100%);
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(211, 197, 246, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero Badge */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(211, 197, 246, 0.15);
+    backdrop-filter: blur(8px);
+    padding: 6px 16px 6px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #D3C5F6;
+    border: 1px solid rgba(211, 197, 246, 0.2);
+    margin-bottom: 16px;
+}
+
+.hero-badge i {
+    font-size: 14px;
+}
+
+.hero-content h1 {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.12;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.hero-content h1 span {
+    color: #D3C5F6;
+    position: relative;
+}
+
+.hero-content h1 span::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(211, 197, 246, 0.3);
+    border-radius: 4px;
+}
+
+.hero-content p {
+    font-size: 18px;
+    opacity: 0.85;
+    max-width: 480px;
+    margin-bottom: 28px;
+    line-height: 1.7;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+/* Hero Stats */
+.hero-stats {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-stat-number {
+    font-size: 22px;
+    font-weight: 700;
+    color: #D3C5F6;
+}
+
+.hero-stat-label {
+    font-size: 13px;
+    opacity: 0.6;
+}
+
+.hero-stat-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Hero Image / Map Placeholder */
+.hero-image {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 40px 32px;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.hero-image:hover {
+    border-color: rgba(211, 197, 246, 0.3);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+}
+
+.hero-map-placeholder {
+    text-align: center;
+}
+
+.hero-map-placeholder i {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+    color: #D3C5F6;
+    opacity: 0.7;
+}
+
+.hero-map-placeholder span {
+    font-size: 18px;
+    font-weight: 600;
+    display: block;
+}
+
+.hero-map-placeholder small {
+    font-size: 14px;
+    opacity: 0.5;
+    display: block;
+    margin-top: 4px;
+}
+
+.hero-map-dots {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.hero-map-dots .dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-map-dots .dot.blue { background: #0a2463; }
+.hero-map-dots .dot.green { background: #2b8a3e; }
+.hero-map-dots .dot.orange { background: #e85d04; }
+.hero-map-dots .dot.red { background: #c92a2a; }
+.hero-map-dots .dot.purple { background: #7b2fbe; }
+
+@media (max-width: 900px) {
+    .hero {
+        padding: 32px 16px 48px;
+    }
+    .hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 32px;
+    }
+    .hero-content p {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .hero-buttons {
+        justify-content: center;
+    }
+    .hero-content h1 {
+        font-size: 32px;
+    }
+    .hero-stats {
+        justify-content: center;
+    }
+    .hero-image {
+        min-height: 200px;
+        padding: 24px;
+    }
+}
+
+@media (max-width: 500px) {
+    .hero-content h1 {
+        font-size: 26px;
+    }
+    .hero-stats {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .hero-stat-divider {
+        display: none;
+    }
+    .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ===== FEATURES SECTION ===== */
+.features {
+    padding: 60px 24px 80px;
+    background: #FFFFFF;
+}
+
+.features-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.feature-card {
+    background: #F8F9FA;
+    border-radius: 16px;
+    padding: 32px 28px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid #E9ECEF;
+}
+
+.feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border-color: #D3C5F6;
+}
+
+.feature-card.featured {
+    background: linear-gradient(145deg, #F8F9FA, #F0EDF5);
+    border-color: #D3C5F6;
+    box-shadow: 0 4px 20px rgba(211, 197, 246, 0.2);
+}
+
+.feature-card.featured:hover {
+    box-shadow: 0 8px 40px rgba(211, 197, 246, 0.3);
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    background: #D3C5F6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 24px;
+    color: #3B2A60;
+}
+
+.feature-card h3 {
+    font-size: 20px;
+    color: #3B2A60;
+    margin-bottom: 8px;
+}
+
+.feature-card p {
+    font-size: 14px;
+    color: #6C757D;
+    margin-bottom: 16px;
+    line-height: 1.7;
+}
+
+.feature-card .btn {
+    margin-top: 4px;
+}
+
+@media (max-width: 800px) {
+    .features-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 500px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    .features {
+        padding: 40px 16px 60px;
+    }
+}
+
+/* ===== STATS BAR ===== */
+.stats-bar {
+    background: #FFFFFF;
+    padding: 32px 24px;
+    border-top: 1px solid #E9ECEF;
+    border-bottom: 1px solid #E9ECEF;
+}
+
+.stats-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    text-align: center;
+}
+
+.stat-item {
+    padding: 8px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 34px;
+    font-weight: 800;
+    color: #3B2A60;
+    letter-spacing: -0.5px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 14px;
+    color: #6C757D;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    .stat-number {
+        font-size: 26px;
+    }
+}
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+    padding: 60px 24px;
+    background: linear-gradient(145deg, #3B2A60 0%, #1F1433 100%);
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.cta-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.cta-container h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.cta-container p {
+    font-size: 16px;
+    opacity: 0.8;
+    margin-bottom: 28px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-container .btn-secondary {
+    font-size: 16px;
+    padding: 14px 36px;
+}
+
+.cta-container .btn-secondary i {
+    transition: transform 0.3s ease;
+}
+
+.cta-container .btn-secondary:hover i {
+    transform: translateX(4px);
+}
+
+@media (max-width: 500px) {
+    .cta-section {
+        padding: 40px 16px;
+    }
+    .cta-container h2 {
+        font-size: 24px;
+    }
+}

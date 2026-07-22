@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Driver - RidePool+</title>
+    <meta name="description" content="View and manage your ride-pooling and delivery assignments in Owerri's urban-rural transport network." />
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Leaflet.js for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="../../assets/css/style.css" />
+    <!-- Page Specific Styles -->
+    <link rel="stylesheet" href="driver.css" />
+</head>
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-car-side"></i>
+                <span>Ride<span>Pool</span>+</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../landing/index.html">Home</a></li>
+                <li><a href="../dashboard/index.html">Dashboard</a></li>
+                <li><a href="../passenger/index.html">Passenger</a></li>
+                <li><a href="../driver/index.html" class="active">Driver</a></li>
+                <li><a href="../admin/index.html">Admin</a></li>
+            </ul>
+            <a href="../dashboard/index.html" class="btn btn-primary btn-nav">Launch Simulation</a>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HEADER ===== -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="header-left">
+                <div class="driver-avatar">
+                    <span>🚗</span>
+                </div>
+                <div class="driver-info">
+                    <h1>Chidi Okonkwo</h1>
+                    <p><i class="fas fa-id-card"></i> Driver ID: #D014</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-badge online" id="statusBadge">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Online</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="statusToggle" checked />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== NOTIFICATION BANNER ===== -->
+    <div class="notification-banner" id="notificationBanner">
+        <div class="notification-content">
+            <i class="fas fa-bell"></i>
+            <span><strong>New delivery task</strong> available on your route!</span>
+            <span class="notification-location"><i class="fas fa-map-pin"></i> Obinze Market → World Bank</span>
+        </div>
+        <div class="notification-actions">
+            <button class="btn btn-success btn-sm" id="acceptDelivery">Accept</button>
+            <button class="btn btn-outline btn-sm" id="declineDelivery">Decline</button>
+        </div>
+        <button class="notification-close" id="closeNotification">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="driver-container">
+
+        <!-- ===== ASSIGNMENT CARD ===== -->
+        <div class="assignment-card card">
+            <div class="card-header">
+                <h2><i class="fas fa-clipboard-list"></i> Current Assignment</h2>
+                <span class="badge badge-primary" id="assignmentType">Ride-Pooling</span>
+            </div>
+
+            <!-- ===== RIDE-POOLING ASSIGNMENT ===== -->
+            <div class="assignment-content" id="ridePoolingAssignment">
+                <div class="passenger-ride-group">
+                    <div class="passenger-ride">
+                        <div class="passenger-ride-header">
+                            <span class="passenger-number">Passenger 1</span>
+                            <span class="badge badge-success">Picked Up</span>
+                        </div>
+                        <div class="route-details">
+                            <div class="route-stop pickup">
+                                <i class="fas fa-map-pin"></i>
+                                <span>FUTO Gate</span>
+                            </div>
+                            <div class="route-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="route-stop dropoff">
+                                <i class="fas fa-flag-checkered"></i>
+                                <span>World Bank</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="passenger-ride">
+                        <div class="passenger-ride-header">
+                            <span class="passenger-number">Passenger 2</span>
+                            <span class="badge badge-warning">Waiting</span>
+                        </div>
+                        <div class="route-details">
+                            <div class="route-stop pickup">
+                                <i class="fas fa-map-pin"></i>
+                                <span>Concorde Hotel</span>
+                            </div>
+                            <div class="route-arrow">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <div class="route-stop dropoff">
+                                <i class="fas fa-flag-checkered"></i>
+                                <span>World Bank</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="assignment-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Total Distance</span>
+                        <span class="summary-value">12.4 km</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item">
+                        <span class="summary-label">Estimated Earnings</span>
+                        <span class="summary-value">₦2,400</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item">
+                        <span class="summary-label">Pickup Window</span>
+                        <span class="summary-value">5 min</span>
+                    </div>
+                </div>
+
+                <div class="assignment-actions">
+                    <button class="btn btn-success" id="startTripBtn">
+                        <i class="fas fa-play"></i> Start Trip
+                    </button>
+                    <button class="btn btn-outline">
+                        <i class="fas fa-route"></i> View Route
+                    </button>
+                    <button class="btn btn-danger">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== DELIVERY ASSIGNMENT (Hidden by default) ===== -->
+            <div class="assignment-content" id="deliveryAssignment" style="display: none;">
+                <div class="delivery-details">
+                    <div class="delivery-package">
+                        <div class="package-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="package-info">
+                            <h4>Small Parcel</h4>
+                            <p>Weight: 2.5 kg</p>
+                            <p><span class="badge badge-primary">Express</span></p>
+                        </div>
+                    </div>
+
+                    <div class="route-details">
+                        <div class="route-stop pickup">
+                            <i class="fas fa-store"></i>
+                            <div>
+                                <span class="route-label">Pickup</span>
+                                <span>Obinze Market</span>
+                            </div>
+                        </div>
+                        <div class="route-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="route-stop dropoff">
+                            <i class="fas fa-home"></i>
+                            <div>
+                                <span class="route-label">Dropoff</span>
+                                <span>World Bank Estate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="assignment-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Delivery Fee</span>
+                            <span class="summary-value">₦1,200</span>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-item">
+                            <span class="summary-label">Time Window</span>
+                            <span class="summary-value">45 min</span>
+                        </div>
+                    </div>
+
+                    <div class="assignment-actions">
+                        <button class="btn btn-success" id="startDeliveryBtn">
+                            <i class="fas fa-play"></i> Start Delivery
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-route"></i> View Route
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ROUTE MAP ===== -->
+        <div class="route-map-card card">
+            <div class="card-header">
+                <h2><i class="fas fa-map"></i> Optimised Route</h2>
+                <span class="badge badge-primary">4 Stops</span>
+            </div>
+            <div id="routeMap"></div>
+            <div class="route-stops">
+                <div class="route-stop-item active">
+                    <span class="stop-number">1</span>
+                    <span class="stop-label">Pickup A</span>
+                    <span class="stop-location">FUTO Gate</span>
+                </div>
+                <div class="route-stop-item">
+                    <span class="stop-number">2</span>
+                    <span class="stop-label">Pickup B</span>
+                    <span class="stop-location">Concorde Hotel</span>
+                </div>
+                <div class="route-stop-item">
+                    <span class="stop-number">3</span>
+                    <span class="stop-label">Dropoff A</span>
+                    <span class="stop-location">World Bank</span>
+                </div>
+                <div class="route-stop-item">
+                    <span class="stop-number">4</span>
+                    <span class="stop-label">Dropoff B</span>
+                    <span class="stop-location">World Bank</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== EARNINGS SUMMARY ===== -->
+        <div class="earnings-summary card">
+            <div class="card-header">
+                <h2><i class="fas fa-wallet"></i> Today's Earnings</h2>
+                <span class="badge badge-success">+12%</span>
+            </div>
+            <div class="earnings-grid">
+                <div class="earning-item">
+                    <span class="earning-label">Today's Earnings</span>
+                    <span class="earning-value">₦12,500</span>
+                </div>
+                <div class="earning-item">
+                    <span class="earning-label">Trips Completed</span>
+                    <span class="earning-value">8</span>
+                </div>
+                <div class="earning-item">
+                    <span class="earning-label">Available Deliveries</span>
+                    <span class="earning-value">3</span>
+                </div>
+                <div class="earning-item">
+                    <span class="earning-label">Rating</span>
+                    <span class="earning-value">⭐ 4.8</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 RidePool+ &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System &bull; Owerri Case Study</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet.js -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <!-- Global JavaScript -->
+    <script src="../../assets/js/main.js"></script>
+    <!-- Page Specific JavaScript -->
+    <script src="driver.js"></script>
+</body>
+</html>

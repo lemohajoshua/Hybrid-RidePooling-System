@@ -1,0 +1,311 @@
+/* ================================================================
+   DASHBOARD.CSS - Simulation Dashboard Specific Styles
+   Based on Figma Make (shadcn/ui) design system
+   Colors: Primary #D3C5F6, Secondary #3B2A60
+   ================================================================ */
+
+/* ===== DASHBOARD HEADER ===== */
+.dashboard-header {
+    background: #3B2A60;
+    padding: 14px 24px;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.dashboard-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.dashboard-header h2 i {
+    margin-right: 10px;
+    color: #D3C5F6;
+}
+
+.header-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+.header-status .status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.status-dot.ready {
+    background: #6C757D;
+}
+
+.status-dot.running {
+    background: #2B8A3E;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.status-dot.initialized {
+    background: #D3C5F6;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.status-separator {
+    opacity: 0.3;
+}
+
+.header-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ===== DASHBOARD LAYOUT ===== */
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 320px);
+}
+
+/* ===== MAP CONTAINER ===== */
+.map-container {
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+#map {
+    height: 460px;
+    width: 100%;
+    background: #E9ECEF;
+}
+
+/* ===== LEGEND ===== */
+.legend {
+    font-size: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+    padding: 10px 16px;
+    background: #FFFFFF;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #495057;
+}
+
+.legend .dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dot.blue { background: #0a2463; }
+.dot.green { background: #2b8a3e; }
+.dot.orange { background: #e85d04; }
+.dot.red { background: #c92a2a; }
+.dot.purple { background: #7b2fbe; }
+
+/* ===== PANEL ===== */
+.panel {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 18px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.panel-section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3B2A60;
+    border-bottom: 2px solid #D3C5F6;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.panel-section h3 i {
+    margin-right: 8px;
+    color: #3B2A60;
+}
+
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.btn-group .btn {
+    flex: 1 0 auto;
+    padding: 8px 14px;
+    font-size: 13px;
+    min-width: 65px;
+}
+
+/* ===== STATS GRID ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat-card {
+    background: #F8F9FA;
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: #D3C5F6;
+    box-shadow: 0 2px 8px rgba(211, 197, 246, 0.2);
+}
+
+.stat-card .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #717182;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.stat-card .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #3B2A60;
+    margin-top: 2px;
+}
+
+.stat-value.positive {
+    color: #2B8A3E;
+}
+
+.stat-value.negative {
+    color: #E85D04;
+}
+
+/* ===== LOG BOX ===== */
+.log-box {
+    background: #F8F9FA;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 10px 12px;
+    max-height: 140px;
+    overflow-y: auto;
+    font-size: 12px;
+    font-family: 'Inter', monospace;
+    line-height: 1.7;
+    color: #1A1A2E;
+}
+
+.log-box .log-entry {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    padding: 3px 0;
+}
+
+.log-box .log-entry:last-child {
+    border-bottom: none;
+}
+
+.log-box::-webkit-scrollbar {
+    width: 4px;
+}
+
+.log-box::-webkit-scrollbar-track {
+    background: #F1F3F5;
+    border-radius: 4px;
+}
+
+.log-box::-webkit-scrollbar-thumb {
+    background: #D3C5F6;
+    border-radius: 4px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1000px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px 16px;
+    }
+    .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .header-status {
+        flex-wrap: wrap;
+    }
+    .header-controls {
+        justify-content: flex-start;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .dashboard-layout {
+        padding: 12px;
+        gap: 12px;
+    }
+    #map {
+        height: 300px;
+    }
+    .panel {
+        padding: 14px 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .header-controls .btn {
+        flex: 1 0 45%;
+    }
+}
