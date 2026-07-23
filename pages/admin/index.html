@@ -4,74 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - RidePool+</title>
-    <meta name="description" content="System administration dashboard for RidePool+ performance monitoring and analytics." />
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <!-- Global Styles -->
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <!-- Page Specific Styles -->
     <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
 
-    <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <i class="fas fa-car-side"></i>
             <span>Ride<span>Pool</span>+</span>
         </div>
         <nav class="sidebar-nav">
-            <a href="#" class="active" data-section="overview">
-                <i class="fas fa-chart-pie"></i>
-                <span>Overview</span>
-            </a>
-            <a href="#" data-section="drivers">
-                <i class="fas fa-users"></i>
-                <span>Drivers</span>
-                <span class="badge badge-primary">12</span>
-            </a>
-            <a href="#" data-section="passengers">
-                <i class="fas fa-user"></i>
-                <span>Passengers</span>
-                <span class="badge badge-primary">48</span>
-            </a>
-            <a href="#" data-section="deliveries">
-                <i class="fas fa-box"></i>
-                <span>Deliveries</span>
-                <span class="badge badge-warning">8</span>
-            </a>
-            <a href="#" data-section="analytics">
-                <i class="fas fa-chart-line"></i>
-                <span>Analytics</span>
-            </a>
-            <a href="#" data-section="reports">
-                <i class="fas fa-file-alt"></i>
-                <span>Reports</span>
-            </a>
-            <a href="#" data-section="settings">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a>
+            <a href="#" class="active" data-section="overview"><i class="fas fa-chart-pie"></i><span>Overview</span></a>
+            <a href="#" data-section="drivers"><i class="fas fa-users"></i><span>Drivers</span><span class="badge badge-primary" id="driverCount">0</span></a>
+            <a href="#" data-section="passengers"><i class="fas fa-user"></i><span>Passengers</span><span class="badge badge-primary" id="passengerCount">0</span></a>
+            <a href="#" data-section="deliveries"><i class="fas fa-box"></i><span>Deliveries</span><span class="badge badge-warning" id="deliveryCount">0</span></a>
+            <a href="#" data-section="analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+            <a href="#" data-section="reports"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+            <a href="#" data-section="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
         </nav>
         <div class="sidebar-footer">
-            <a href="../landing/index.html">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </a>
+            <a href="../landing/index.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
         </div>
     </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
     <main class="main-content">
 
-        <!-- ===== TOP HEADER ===== -->
         <header class="admin-header">
             <div class="header-left">
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
                 <div class="header-title">
                     <h1>Performance Dashboard</h1>
                     <p>Real-time system analytics and monitoring</p>
@@ -83,66 +46,33 @@
                     <button class="filter-btn">This Week</button>
                     <button class="filter-btn">This Month</button>
                 </div>
-                <button class="btn btn-primary btn-sm">
-                    <i class="fas fa-download"></i> Export
-                </button>
-                <div class="admin-avatar">
-                    <span>👤</span>
-                </div>
+                <button class="btn btn-primary btn-sm" id="exportBtn"><i class="fas fa-download"></i> Export</button>
+                <div class="admin-avatar"><span>👤</span></div>
             </div>
         </header>
 
-        <!-- ===== KEY METRICS ===== -->
         <section class="metrics-grid" id="overview">
             <div class="metric-card">
-                <div class="metric-icon" style="background:#D3C5F6;">
-                    <i class="fas fa-money-bill-wave" style="color:#3B2A60;"></i>
-                </div>
-                <div class="metric-info">
-                    <span class="metric-label">Total Revenue</span>
-                    <span class="metric-value">₦247,500</span>
-                    <span class="metric-change positive">↑ 12.5%</span>
-                </div>
+                <div class="metric-icon" style="background:#D3C5F6;"><i class="fas fa-money-bill-wave" style="color:#3B2A60;"></i></div>
+                <div class="metric-info"><span class="metric-label">Total Revenue</span><span class="metric-value" id="totalRevenue">₦0</span><span class="metric-change positive">↑ 0%</span></div>
             </div>
             <div class="metric-card">
-                <div class="metric-icon" style="background:#2B8A3E20;">
-                    <i class="fas fa-car" style="color:#2B8A3E;"></i>
-                </div>
-                <div class="metric-info">
-                    <span class="metric-label">Active Drivers</span>
-                    <span class="metric-value">12</span>
-                    <span class="metric-change positive">↑ 2</span>
-                </div>
+                <div class="metric-icon" style="background:#2B8A3E20;"><i class="fas fa-car" style="color:#2B8A3E;"></i></div>
+                <div class="metric-info"><span class="metric-label">Active Drivers</span><span class="metric-value" id="activeDrivers">0</span><span class="metric-change positive">↑ 0</span></div>
             </div>
             <div class="metric-card">
-                <div class="metric-icon" style="background:#E85D0420;">
-                    <i class="fas fa-route" style="color:#E85D04;"></i>
-                </div>
-                <div class="metric-info">
-                    <span class="metric-label">Completed Trips</span>
-                    <span class="metric-value">187</span>
-                    <span class="metric-change positive">↑ 8.3%</span>
-                </div>
+                <div class="metric-icon" style="background:#E85D0420;"><i class="fas fa-route" style="color:#E85D04;"></i></div>
+                <div class="metric-info"><span class="metric-label">Completed Trips</span><span class="metric-value" id="completedTrips">0</span><span class="metric-change positive">↑ 0%</span></div>
             </div>
             <div class="metric-card">
-                <div class="metric-icon" style="background:#7B2FBE20;">
-                    <i class="fas fa-percent" style="color:#7B2FBE;"></i>
-                </div>
-                <div class="metric-info">
-                    <span class="metric-label">Deadhead Reduction</span>
-                    <span class="metric-value">61.3%</span>
-                    <span class="metric-change positive">↑ 5.2%</span>
-                </div>
+                <div class="metric-icon" style="background:#7B2FBE20;"><i class="fas fa-percent" style="color:#7B2FBE;"></i></div>
+                <div class="metric-info"><span class="metric-label">Deadhead Reduction</span><span class="metric-value">61.3%</span><span class="metric-change positive">↑ 5.2%</span></div>
             </div>
         </section>
 
-        <!-- ===== CHARTS SECTION ===== -->
         <section class="charts-grid" id="analytics">
             <div class="chart-card">
-                <div class="chart-header">
-                    <h3><i class="fas fa-chart-line"></i> Deadhead Distance Over Time</h3>
-                    <span class="badge badge-primary">Last 7 days</span>
-                </div>
+                <div class="chart-header"><h3><i class="fas fa-chart-line"></i> Deadhead Distance Over Time</h3><span class="badge badge-primary">Last 7 days</span></div>
                 <div class="chart-container">
                     <div class="chart-placeholder line-chart">
                         <div class="chart-bars">
@@ -155,169 +85,26 @@
                                 <div class="bar" style="height:30%;"></div>
                                 <div class="bar" style="height:25%;"></div>
                             </div>
-                            <div class="bar-labels">
-                                <span>Mon</span>
-                                <span>Tue</span>
-                                <span>Wed</span>
-                                <span>Thu</span>
-                                <span>Fri</span>
-                                <span>Sat</span>
-                                <span>Sun</span>
-                            </div>
+                            <div class="bar-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="chart-card">
-                <div class="chart-header">
-                    <h3><i class="fas fa-users"></i> Driver Income Distribution</h3>
-                    <span class="badge badge-primary">By Zone</span>
-                </div>
+                <div class="chart-header"><h3><i class="fas fa-users"></i> Driver Income Distribution</h3><span class="badge badge-primary">By Zone</span></div>
                 <div class="chart-container">
                     <div class="chart-placeholder bar-chart">
                         <div class="bar-chart-horizontal">
-                            <div class="bar-row">
-                                <span class="bar-label">Urban</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style="width:85%; background:#3B2A60;"></div>
-                                </div>
-                                <span class="bar-value">₦14,200</span>
-                            </div>
-                            <div class="bar-row">
-                                <span class="bar-label">Peri-Urban</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style="width:60%; background:#7B2FBE;"></div>
-                                </div>
-                                <span class="bar-value">₦9,800</span>
-                            </div>
-                            <div class="bar-row">
-                                <span class="bar-label">Rural</span>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style="width:40%; background:#D3C5F6;"></div>
-                                </div>
-                                <span class="bar-value">₦6,500</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3><i class="fas fa-chart-area"></i> Demand vs Delivery</h3>
-                    <span class="badge badge-primary">24hr Trend</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-placeholder area-chart">
-                        <div class="area-chart-legend">
-                            <span><span class="legend-dot" style="background:#3B2A60;"></span> Ride Demand</span>
-                            <span><span class="legend-dot" style="background:#D3C5F6;"></span> Deliveries</span>
-                        </div>
-                        <div class="area-chart-bars">
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:80%;"></div>
-                                <div class="area-bar delivery" style="height:30%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:60%;"></div>
-                                <div class="area-bar delivery" style="height:40%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:90%;"></div>
-                                <div class="area-bar delivery" style="height:20%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:70%;"></div>
-                                <div class="area-bar delivery" style="height:50%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:40%;"></div>
-                                <div class="area-bar delivery" style="height:60%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:50%;"></div>
-                                <div class="area-bar delivery" style="height:70%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:30%;"></div>
-                                <div class="area-bar delivery" style="height:80%;"></div>
-                            </div>
-                            <div class="area-group">
-                                <div class="area-bar demand" style="height:20%;"></div>
-                                <div class="area-bar delivery" style="height:90%;"></div>
-                            </div>
-                        </div>
-                        <div class="area-labels">
-                            <span>6am</span>
-                            <span>9am</span>
-                            <span>12pm</span>
-                            <span>3pm</span>
-                            <span>6pm</span>
-                            <span>9pm</span>
-                            <span>12am</span>
-                            <span>3am</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3><i class="fas fa-map"></i> Zone Performance</h3>
-                    <span class="badge badge-primary">Heat Map</span>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-placeholder heatmap">
-                        <div class="heatmap-grid">
-                            <div class="heatmap-row">
-                                <span class="heatmap-label">Owerri Municipal</span>
-                                <div class="heatmap-cells">
-                                    <div class="heatmap-cell high"></div>
-                                    <div class="heatmap-cell high"></div>
-                                    <div class="heatmap-cell medium"></div>
-                                    <div class="heatmap-cell medium"></div>
-                                </div>
-                            </div>
-                            <div class="heatmap-row">
-                                <span class="heatmap-label">Obinze</span>
-                                <div class="heatmap-cells">
-                                    <div class="heatmap-cell low"></div>
-                                    <div class="heatmap-cell medium"></div>
-                                    <div class="heatmap-cell low"></div>
-                                    <div class="heatmap-cell low"></div>
-                                </div>
-                            </div>
-                            <div class="heatmap-row">
-                                <span class="heatmap-label">Ihiagwa</span>
-                                <div class="heatmap-cells">
-                                    <div class="heatmap-cell low"></div>
-                                    <div class="heatmap-cell low"></div>
-                                    <div class="heatmap-cell medium"></div>
-                                    <div class="heatmap-cell low"></div>
-                                </div>
-                            </div>
-                            <div class="heatmap-row">
-                                <span class="heatmap-label">World Bank</span>
-                                <div class="heatmap-cells">
-                                    <div class="heatmap-cell high"></div>
-                                    <div class="heatmap-cell high"></div>
-                                    <div class="heatmap-cell high"></div>
-                                    <div class="heatmap-cell medium"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="heatmap-legend">
-                            <span><span class="heatmap-legend-dot high"></span> High Demand</span>
-                            <span><span class="heatmap-legend-dot medium"></span> Medium Demand</span>
-                            <span><span class="heatmap-legend-dot low"></span> Low Demand</span>
+                            <div class="bar-row"><span class="bar-label">Urban</span><div class="bar-track"><div class="bar-fill" style="width:85%; background:#3B2A60;"></div></div><span class="bar-value">₦14,200</span></div>
+                            <div class="bar-row"><span class="bar-label">Peri-Urban</span><div class="bar-track"><div class="bar-fill" style="width:60%; background:#7B2FBE;"></div></div><span class="bar-value">₦9,800</span></div>
+                            <div class="bar-row"><span class="bar-label">Rural</span><div class="bar-track"><div class="bar-fill" style="width:40%; background:#D3C5F6;"></div></div><span class="bar-value">₦6,500</span></div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ===== RECENT ACTIVITY ===== -->
         <section class="activity-section" id="drivers">
             <div class="activity-header">
                 <h2><i class="fas fa-clock"></i> Recent Activity</h2>
@@ -325,126 +112,27 @@
                     <button class="filter-btn active">All</button>
                     <button class="filter-btn">Rides</button>
                     <button class="filter-btn">Deliveries</button>
-                    <button class="filter-btn">Drivers</button>
                 </div>
             </div>
             <div class="activity-table-wrapper">
                 <table class="activity-table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Type</th>
-                            <th>Driver</th>
-                            <th>Passenger / Delivery</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Time</th><th>Type</th><th>Driver</th><th>Route</th><th>Status</th></tr></thead>
                     <tbody id="activityBody">
-                        <tr>
-                            <td>10:32 AM</td>
-                            <td><span class="type-badge ride">🚗 Ride</span></td>
-                            <td><strong>Chidi O.</strong> #D014</td>
-                            <td>FUTO → World Bank</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                        </tr>
-                        <tr>
-                            <td>10:15 AM</td>
-                            <td><span class="type-badge delivery">📦 Delivery</span></td>
-                            <td><strong>Amara E.</strong> #D008</td>
-                            <td>Obinze Market → World Bank</td>
-                            <td><span class="status-badge in-progress">In Progress</span></td>
-                        </tr>
-                        <tr>
-                            <td>09:45 AM</td>
-                            <td><span class="type-badge ride">🚗 Ride</span></td>
-                            <td><strong>Kelechi N.</strong> #D003</td>
-                            <td>Concorde → Obinze</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                        </tr>
-                        <tr>
-                            <td>09:20 AM</td>
-                            <td><span class="type-badge delivery">📦 Delivery</span></td>
-                            <td><strong>Chidi O.</strong> #D014</td>
-                            <td>Ihiagwa → FUTO</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                        </tr>
-                        <tr>
-                            <td>08:55 AM</td>
-                            <td><span class="type-badge ride">🚗 Ride</span></td>
-                            <td><strong>Ngozi B.</strong> #D021</td>
-                            <td>World Bank → Nekede</td>
-                            <td><span class="status-badge cancelled">Cancelled</span></td>
-                        </tr>
-                        <tr>
-                            <td>08:30 AM</td>
-                            <td><span class="type-badge ride">🚗 Ride</span></td>
-                            <td><strong>Amara E.</strong> #D008</td>
-                            <td>Obinze → Concorde</td>
-                            <td><span class="status-badge completed">Completed</span></td>
-                        </tr>
+                        <tr><td colspan="5" style="text-align:center;color:#6C757D;">No activity yet. Start the simulation.</td></tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- ===== ALERTS SECTION ===== -->
         <section class="alerts-section" id="reports">
-            <div class="alerts-header">
-                <h2><i class="fas fa-bell"></i> System Alerts</h2>
-                <span class="badge badge-danger">3 New</span>
-            </div>
-            <div class="alerts-list">
-                <div class="alert-item">
-                    <div class="alert-icon success">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <p><strong>Driver #D014</strong> reached daily income goal of ₦12,500</p>
-                        <span class="alert-time">10 minutes ago</span>
-                    </div>
-                </div>
-                <div class="alert-item">
-                    <div class="alert-icon warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <p><strong>New delivery task</strong> created in Obinze area</p>
-                        <span class="alert-time">25 minutes ago</span>
-                    </div>
-                </div>
-                <div class="alert-item">
-                    <div class="alert-icon info">
-                        <i class="fas fa-info-circle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <p><strong>System update:</strong> Simulation engine v2.1 deployed</p>
-                        <span class="alert-time">1 hour ago</span>
-                    </div>
-                </div>
-                <div class="alert-item">
-                    <div class="alert-icon success">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <p><strong>Deadhead reduction</strong> target of 60% achieved</p>
-                        <span class="alert-time">2 hours ago</span>
-                    </div>
-                </div>
-                <div class="alert-item">
-                    <div class="alert-icon warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="alert-content">
-                        <p><strong>Low demand</strong> detected in Ihiagwa rural zone</p>
-                        <span class="alert-time">3 hours ago</span>
-                    </div>
-                </div>
+            <div class="alerts-header"><h2><i class="fas fa-bell"></i> System Alerts</h2><span class="badge badge-danger">0 New</span></div>
+            <div class="alerts-list" id="alertsList">
+                <div class="alert-item"><div class="alert-icon info"><i class="fas fa-info-circle"></i></div><div class="alert-content"><p><strong>System ready</strong> awaiting simulation start</p><span class="alert-time">Just now</span></div></div>
             </div>
         </section>
 
     </main>
 
-    <!-- ===== FOOTER ===== -->
     <footer style="margin-left:260px; background:#F8F9FA; padding:16px 24px; border-top:1px solid rgba(0,0,0,0.06);">
         <div class="footer-container" style="max-width:100%;">
             <p style="color:#6C757D; font-size:13px;">&copy; 2026 RidePool+ &bull; Admin Dashboard &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System</p>
@@ -456,9 +144,173 @@
         </div>
     </footer>
 
-    <!-- Global JavaScript -->
     <script src="../../assets/js/main.js"></script>
-    <!-- Page Specific JavaScript -->
-    <script src="admin.js"></script>
+    <script type="module">
+        import { supabase, getSummaryMetrics } from '../../assets/js/supabase-client.js'
+
+        // ================================================================
+        // LOAD DATA
+        // ================================================================
+
+        async function loadAdminData() {
+            try {
+                // Get metrics
+                const metrics = await getSummaryMetrics()
+
+                // Get counts
+                const { count: driverCount } = await supabase.from('drivers').select('*', { count: 'exact', head: true })
+                const { count: passengerCount } = await supabase.from('passengers').select('*', { count: 'exact', head: true })
+                const { data: deliveries } = await supabase.from('delivery_tasks').select('status')
+                const { data: trips } = await supabase.from('trips').select('status')
+
+                // Update metrics
+                document.getElementById('totalRevenue').textContent = '₦' + metrics.totalRevenue.toLocaleString()
+                document.getElementById('activeDrivers').textContent = driverCount || 0
+                document.getElementById('completedTrips').textContent = trips?.filter(t => t.status === 'completed').length || 0
+
+                // Update badges
+                document.getElementById('driverCount').textContent = driverCount || 0
+                document.getElementById('passengerCount').textContent = passengerCount || 0
+                document.getElementById('deliveryCount').textContent = deliveries?.length || 0
+
+                // Update alerts
+                const alertsList = document.getElementById('alertsList')
+                const alertBadge = document.querySelector('.alerts-header .badge')
+
+                const pendingDeliveries = deliveries?.filter(d => d.status === 'pending').length || 0
+                const inProgressTrips = trips?.filter(t => t.status === 'in_progress').length || 0
+
+                if (pendingDeliveries > 0 || inProgressTrips > 0) {
+                    const newAlerts = pendingDeliveries + inProgressTrips
+                    alertBadge.textContent = newAlerts + ' New'
+
+                    if (pendingDeliveries > 0) {
+                        const alert = document.createElement('div')
+                        alert.className = 'alert-item'
+                        alert.innerHTML = `
+                            <div class="alert-icon warning"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="alert-content">
+                                <p><strong>${pendingDeliveries} delivery task(s)</strong> waiting for assignment</p>
+                                <span class="alert-time">Now</span>
+                            </div>
+                        `
+                        alertsList.prepend(alert)
+                    }
+
+                    if (inProgressTrips > 0) {
+                        const alert = document.createElement('div')
+                        alert.className = 'alert-item'
+                        alert.innerHTML = `
+                            <div class="alert-icon success"><i class="fas fa-check-circle"></i></div>
+                            <div class="alert-content">
+                                <p><strong>${inProgressTrips} trip(s)</strong> currently in progress</p>
+                                <span class="alert-time">Now</span>
+                            </div>
+                        `
+                        alertsList.prepend(alert)
+                    }
+                }
+
+                // Update activity table
+                const { data: recentTrips } = await supabase
+                    .from('trips')
+                    .select('*, drivers(name)')
+                    .order('start_time', { ascending: false })
+                    .limit(5)
+
+                const tbody = document.getElementById('activityBody')
+                if (recentTrips && recentTrips.length > 0) {
+                    tbody.innerHTML = recentTrips.map(t => `
+                        <tr>
+                            <td>${new Date(t.start_time).toLocaleTimeString()}</td>
+                            <td><span class="type-badge ride">🚗 Ride</span></td>
+                            <td><strong>${t.drivers?.name || 'Unknown'}</strong></td>
+                            <td>${t.total_distance || 0} km</td>
+                            <td><span class="status-badge ${t.status === 'completed' ? 'completed' : 'in-progress'}">${t.status}</span></td>
+                        </tr>
+                    `).join('')
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#6C757D;">No trips recorded yet.</td></tr>`
+                }
+
+            } catch (error) {
+                console.error('Error loading admin data:', error)
+            }
+        }
+
+        // ================================================================
+        // SIDEBAR TOGGLE
+        // ================================================================
+
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open')
+        })
+
+        // ================================================================
+        // EXPORT
+        // ================================================================
+
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...'
+            this.disabled = true
+
+            setTimeout(() => {
+                alert('📊 Report exported successfully!')
+                this.innerHTML = '<i class="fas fa-download"></i> Export'
+                this.disabled = false
+            }, 1500)
+        })
+
+        // ================================================================
+        // SIDEBAR NAV
+        // ================================================================
+
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault()
+                document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'))
+                this.classList.add('active')
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open')
+                }
+            })
+        })
+
+        // ================================================================
+        // FILTER BUTTONS
+        // ================================================================
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = this.closest('.date-filter, .activity-filters')
+                if (parent) {
+                    parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+                }
+                this.classList.add('active')
+            })
+        })
+
+        // ================================================================
+        // LOAD
+        // ================================================================
+
+        loadAdminData()
+
+        // Refresh every 30 seconds
+        setInterval(loadAdminData, 30000)
+
+        console.log('👤 Admin Dashboard loaded')
+        console.log('⌨️ Shortcuts: [1] Overview, [2] Drivers, [3] Analytics, [E] Export')
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '1') document.querySelector('.sidebar-nav a[data-section="overview"]')?.click()
+            if (e.key === '2') document.querySelector('.sidebar-nav a[data-section="drivers"]')?.click()
+            if (e.key === '3') document.querySelector('.sidebar-nav a[data-section="analytics"]')?.click()
+            if ((e.key === 'e' || e.key === 'E') && !document.getElementById('exportBtn').disabled) {
+                document.getElementById('exportBtn').click()
+            }
+        })
+    </script>
+
 </body>
 </html>

@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RidePool+ | Optimise Ride-Pooling &amp; Delivery in Urban-Rural Networks</title>
-    <meta name="description" content="Optimise urban-rural ride-pooling and delivery with real-time simulations that reduce costs, increase driver income, and improve transport efficiency." />
-    <!-- Font Awesome Icons -->
+    <title>RidePool+ | Hybrid Ride-Pooling &amp; Delivery Optimisation</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <!-- Global Styles -->
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <!-- Page Specific Styles -->
     <link rel="stylesheet" href="landing.css" />
 </head>
 <body>
@@ -24,15 +19,14 @@
                 <span>Ride<span>Pool</span>+</span>
             </div>
             <ul class="nav-links">
-                <li><a href="../landing/index.html" class="active">Home</a></li>
+                <li><a href="index.html" class="active">Home</a></li>
                 <li><a href="../dashboard/index.html">Dashboard</a></li>
                 <li><a href="../passenger/index.html">Passenger</a></li>
                 <li><a href="../driver/index.html">Driver</a></li>
+                <li><a href="../delivery/index.html">Send Delivery</a></li>
                 <li><a href="../admin/index.html">Admin</a></li>
-                <li><a href="../delivery/index.html">Deliveries</a></li>
                 <li><a href="../auth/login.html" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Sign In</a></li>
             </ul>
-            <a href="../dashboard/index.html" class="btn btn-primary btn-nav">Launch Simulation</a>
             <button class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
             </button>
@@ -48,7 +42,7 @@
                     <span>Owerri Urban-Rural Transport Network</span>
                 </div>
                 <h1>Optimise Ride-Pooling &amp; <span>Delivery</span> in Urban-Rural Networks</h1>
-                <p>Reduce deadhead trips, increase driver income, and improve mobility in Owerri's transport network with our hybrid optimisation framework.</p>
+                <p>Reduce deadhead trips, increase driver income, and improve mobility in Owerri's transport network.</p>
                 <div class="hero-buttons">
                     <a href="../dashboard/index.html" class="btn btn-secondary btn-lg">
                         <i class="fas fa-play"></i> Launch Simulation
@@ -57,17 +51,17 @@
                 </div>
                 <div class="hero-stats">
                     <div class="hero-stat">
-                        <span class="hero-stat-number">61.3%</span>
+                        <span class="hero-stat-number" id="statDeadhead">61.3%</span>
                         <span class="hero-stat-label">Deadhead Reduction</span>
                     </div>
                     <div class="hero-stat-divider"></div>
                     <div class="hero-stat">
-                        <span class="hero-stat-number">₦18,750</span>
+                        <span class="hero-stat-number" id="statIncome">₦18,750</span>
                         <span class="hero-stat-label">Driver Income</span>
                     </div>
                     <div class="hero-stat-divider"></div>
                     <div class="hero-stat">
-                        <span class="hero-stat-number">30%</span>
+                        <span class="hero-stat-number" id="statCost">30%</span>
                         <span class="hero-stat-label">Cost Savings</span>
                     </div>
                 </div>
@@ -98,43 +92,21 @@
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-users"></i></div>
                     <h3>Ride-Pooling</h3>
-                    <p>Match two passengers travelling to the same destination, reducing costs and vehicle usage through intelligent pairing.</p>
+                    <p>Match two passengers travelling to the same destination, reducing costs and vehicle usage.</p>
                     <a href="../passenger/index.html" class="btn btn-outline btn-sm">Learn More →</a>
                 </div>
                 <div class="feature-card featured">
                     <div class="feature-icon"><i class="fas fa-box"></i></div>
                     <h3>Delivery Allocation</h3>
-                    <p>Assign delivery tasks to drivers in low-demand rural areas, preventing empty return trips and creating new revenue streams.</p>
-                    <a href="../driver/index.html" class="btn btn-secondary btn-sm">Learn More →</a>
+                    <p>Assign delivery tasks to drivers in low-demand rural areas, preventing empty return trips.</p>
+                    <a href="../delivery/index.html" class="btn btn-secondary btn-sm">Learn More →</a>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-route"></i></div>
                     <h3>Deadhead Reduction</h3>
-                    <p>Minimise empty return trips through intelligent route optimisation and real-time task allocation based on demand density.</p>
+                    <p>Minimise empty return trips through intelligent route optimisation and task allocation.</p>
                     <a href="../dashboard/index.html" class="btn btn-outline btn-sm">Learn More →</a>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== STATS BAR ===== -->
-    <section class="stats-bar">
-        <div class="stats-container">
-            <div class="stat-item">
-                <span class="stat-number">61.3%</span>
-                <span class="stat-label">Deadhead Reduction</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">₦18,750</span>
-                <span class="stat-label">Average Driver Income</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">30%</span>
-                <span class="stat-label">Passenger Cost Savings</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">87.5%</span>
-                <span class="stat-label">Delivery Completion Rate</span>
             </div>
         </div>
     </section>
@@ -162,9 +134,7 @@
         </div>
     </footer>
 
-    <!-- Global JavaScript -->
     <script src="../../assets/js/main.js"></script>
-    <!-- Page Specific JavaScript -->
     <script src="landing.js"></script>
 </body>
 </html>

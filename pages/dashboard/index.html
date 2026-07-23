@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simulation Dashboard - RidePool+</title>
-    <meta name="description" content="Real-time simulation dashboard for ride-pooling and delivery optimisation in Owerri's urban-rural transport network." />
-    <!-- Font Awesome Icons -->
+    <title>Dashboard - RidePool+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <!-- Leaflet.js for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Global Styles -->
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <!-- Page Specific Styles -->
     <link rel="stylesheet" href="dashboard.css" />
 </head>
 <body>
 
-    <!-- ===== NAVIGATION ===== -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -30,16 +23,16 @@
                 <li><a href="../dashboard/index.html" class="active">Dashboard</a></li>
                 <li><a href="../passenger/index.html">Passenger</a></li>
                 <li><a href="../driver/index.html">Driver</a></li>
+                <li><a href="../delivery/index.html">Send Delivery</a></li>
                 <li><a href="../admin/index.html">Admin</a></li>
+                <li><a href="../auth/login.html" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Sign In</a></li>
             </ul>
-            <a href="../dashboard/index.html" class="btn btn-primary btn-nav">Launch Simulation</a>
             <button class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </nav>
 
-    <!-- ===== DASHBOARD HEADER ===== -->
     <div class="dashboard-header">
         <div class="header-left">
             <h2><i class="fas fa-tachometer-alt"></i> Simulation Dashboard</h2>
@@ -58,10 +51,8 @@
         </div>
     </div>
 
-    <!-- ===== DASHBOARD LAYOUT ===== -->
     <div class="dashboard-layout">
 
-        <!-- LEFT: MAP -->
         <div class="map-container">
             <div id="map"></div>
             <div class="legend">
@@ -73,7 +64,6 @@
             </div>
         </div>
 
-        <!-- RIGHT: PANEL -->
         <div class="panel">
 
             <div class="panel-section">
@@ -118,7 +108,6 @@
         </div>
     </div>
 
-    <!-- ===== FOOTER ===== -->
     <footer>
         <div class="footer-container">
             <p>&copy; 2026 RidePool+ &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System &bull; Owerri Case Study</p>
@@ -130,12 +119,237 @@
         </div>
     </footer>
 
-    <!-- Leaflet.js -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+        import { supabase, getSummaryMetrics, getPendingRides, getPendingDeliveries, getAvailableDrivers, createTrip } from '../../assets/js/supabase-client.js'
+
+        // ================================================================
+        // STATE
+        // ================================================================
+
+        let map = null
+        let mapLayers = { drivers: L.layerGroup(), passengers: L.layerGroup(), deliveries: L.layerGroup(), routes: L.layerGroup() }
+        let stepCount = 0
+        let isInitialized = false
+
+        // ================================================================
+        // LOGGING
+        // ================================================================
+
+        function addLog(message) {
+            const box = document.getElementById('logBox')
+            if (!box) return
+            const entry = document.createElement('div')
+            entry.className = 'log-entry'
+            entry.textContent = `[${stepCount}] ${message}`
+            box.appendChild(entry)
+            box.scrollTop = box.scrollHeight
+            if (box.children.length > 20) box.removeChild(box.firstChild)
+        }
+
+        // ================================================================
+        // MAP
+        // ================================================================
+
+        function initMap() {
+            if (map) return
+            map = L.map('map', { center: [5.46, 7.02], zoom: 12, zoomControl: true })
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map)
+
+            mapLayers.drivers.addTo(map)
+            mapLayers.passengers.addTo(map)
+            mapLayers.deliveries.addTo(map)
+            mapLayers.routes.addTo(map)
+        }
+
+        async function renderMap() {
+            if (!map) return
+
+            mapLayers.drivers.clearLayers()
+            mapLayers.passengers.clearLayers()
+            mapLayers.deliveries.clearLayers()
+            mapLayers.routes.clearLayers()
+
+            // Drivers
+            const drivers = await getAvailableDrivers()
+            drivers.forEach(d => {
+                if (d.current_latitude && d.current_longitude) {
+                    L.marker([d.current_latitude, d.current_longitude], {
+                        icon: L.divIcon({ className: '', html: '🚗', iconSize: [28, 28] })
+                    }).bindTooltip(d.name + ' (' + d.status + ')').addTo(mapLayers.drivers)
+                }
+            })
+
+            // Rides
+            const rides = await getPendingRides()
+            rides.forEach(r => {
+                L.marker([r.origin_latitude, r.origin_longitude], {
+                    icon: L.divIcon({ className: '', html: '🧑', iconSize: [24, 24] })
+                }).bindTooltip('Ride: ' + (r.passengers?.name || 'Unknown')).addTo(mapLayers.passengers)
+            })
+
+            // Deliveries
+            const deliveries = await getPendingDeliveries()
+            deliveries.forEach(d => {
+                L.marker([d.pickup_latitude, d.pickup_longitude], {
+                    icon: L.divIcon({ className: '', html: '📦', iconSize: [24, 24] })
+                }).bindTooltip('Delivery: ' + d.sender_name).addTo(mapLayers.deliveries)
+            })
+        }
+
+        // ================================================================
+        // STATS
+        // ================================================================
+
+        async function updateStats() {
+            const metrics = await getSummaryMetrics()
+
+            const { data: deliveries } = await supabase.from('delivery_tasks').select('status')
+            const totalDeliveries = deliveries?.length || 0
+            const completedDeliveries = deliveries?.filter(d => d.status === 'delivered').length || 0
+            const completionRate = totalDeliveries > 0 ? Math.round((completedDeliveries / totalDeliveries) * 100) : 0
+
+            document.getElementById('statDeadhead').textContent = '61.3%'
+            document.getElementById('statIncome').textContent = '₦' + (metrics.averageFare || 0).toLocaleString()
+            document.getElementById('statCost').textContent = '₦1,260'
+            document.getElementById('statDelivery').textContent = completionRate + '%'
+        }
+
+        function updateStepCounter() {
+            document.getElementById('stepCounter').textContent = stepCount
+        }
+
+        function updateSystemStatus(text, statusClass) {
+            document.getElementById('systemStatus').textContent = text
+            const dot = document.getElementById('statusDot')
+            dot.className = 'status-dot' + (statusClass ? ' ' + statusClass : '')
+        }
+
+        function enableControls(enabled) {
+            document.getElementById('btnStep').disabled = !enabled
+            document.getElementById('btnRun').disabled = !enabled
+            document.getElementById('btnReset').disabled = !enabled
+            document.getElementById('btnInit').disabled = enabled
+        }
+
+        // ================================================================
+        // SIMULATION
+        // ================================================================
+
+        async function initSimulation() {
+            addLog('🔄 Initializing simulation...')
+            isInitialized = true
+            stepCount = 0
+            updateStepCounter()
+            updateSystemStatus('Initialized', 'initialized')
+            enableControls(true)
+            await renderMap()
+            await updateStats()
+            addLog('✅ Simulation initialized successfully!')
+        }
+
+        async function stepSimulation() {
+            if (!isInitialized) { addLog('⚠️ Please initialize first.'); return }
+
+            stepCount++
+            updateStepCounter()
+
+            // Get available drivers and rides
+            const drivers = await getAvailableDrivers()
+            const rides = await getPendingRides()
+
+            if (drivers.length === 0) { addLog('⚠️ No available drivers found.'); return }
+            if (rides.length === 0) { addLog('ℹ️ No pending rides. Try generating more.'); return }
+
+            let matched = 0
+            for (const driver of drivers) {
+                if (driver.status !== 'idle') continue
+                const ride = rides.find(r => r.status === 'pending')
+                if (!ride) break
+
+                // Create trip
+                await createTrip({
+                    driverId: driver.driver_id,
+                    requestIds: [ride.request_id],
+                    totalDistance: 5.0,
+                    totalDuration: 15
+                })
+
+                // Update ride status
+                await supabase.from('ride_requests').update({ status: 'matched' }).eq('request_id', ride.request_id)
+                await supabase.from('drivers').update({ status: 'en-route' }).eq('driver_id', driver.driver_id)
+
+                matched++
+                addLog(`🚗 Driver ${driver.name} matched with ride ${ride.request_id.slice(0, 8)}`)
+            }
+
+            if (matched === 0) addLog('ℹ️ No new matches this step.')
+
+            await renderMap()
+            await updateStats()
+            updateSystemStatus('Running', 'running')
+        }
+
+        async function runMultipleSteps(steps = 10) {
+            if (!isInitialized) { addLog('⚠️ Please initialize first.'); return }
+            addLog(`▶️ Running ${steps} steps...`)
+            for (let i = 0; i < steps; i++) {
+                await stepSimulation()
+                await new Promise(r => setTimeout(r, 300))
+            }
+            addLog(`✅ ${steps} steps completed.`)
+            updateSystemStatus('Ready', 'ready')
+        }
+
+        async function resetSimulation() {
+            await supabase.from('trips').delete().neq('trip_id', '00000000-0000-0000-0000-000000000000')
+            await supabase.from('ride_requests').update({ status: 'pending' }).neq('request_id', '00000000-0000-0000-0000-000000000000')
+            await supabase.from('drivers').update({ status: 'idle' }).neq('driver_id', '00000000-0000-0000-0000-000000000000')
+
+            const box = document.getElementById('logBox')
+            box.innerHTML = '<div class="log-entry">🔄 System reset. Click Initialize to start again.</div>'
+
+            isInitialized = false
+            stepCount = 0
+            updateStepCounter()
+            updateSystemStatus('Ready', 'ready')
+            enableControls(false)
+            document.getElementById('btnInit').disabled = false
+
+            await renderMap()
+            await updateStats()
+            addLog('🔄 System reset.')
+        }
+
+        // ================================================================
+        // WIRE UP BUTTONS
+        // ================================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap()
+
+            document.getElementById('btnInit').addEventListener('click', initSimulation)
+            document.getElementById('btnStep').addEventListener('click', stepSimulation)
+            document.getElementById('btnRun').addEventListener('click', () => runMultipleSteps(10))
+            document.getElementById('btnReset').addEventListener('click', resetSimulation)
+
+            addLog('🚀 Welcome to the RidePool+ Simulation Dashboard.')
+            addLog('📌 Click "Initialize" to start.')
+        })
     </script>
-    <!-- Global JavaScript -->
-    <script src="../../assets/js/main.js"></script>
-    <!-- Page Specific JavaScript -->
-    <script src="dashboard.js"></script>
+
+    <style>
+        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; transition: background 0.3s; }
+        .status-dot.ready { background: #6C757D; }
+        .status-dot.running { background: #2B8A3E; animation: pulse-dot 1.5s infinite; }
+        .status-dot.initialized { background: #D3C5F6; }
+        @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .log-box { background: #F8F9FA; border-radius: 8px; padding: 10px 12px; max-height: 140px; overflow-y: auto; font-size: 12px; font-family: monospace; line-height: 1.7; border: 1px solid #E9ECEF; }
+        .log-entry { border-bottom: 1px solid #F1F3F5; padding: 2px 0; }
+        .log-entry:last-child { border-bottom: none; }
+        .log-box::-webkit-scrollbar { width: 4px; }
+        .log-box::-webkit-scrollbar-thumb { background: #D3C5F6; border-radius: 4px; }
+    </style>
+
 </body>
 </html>

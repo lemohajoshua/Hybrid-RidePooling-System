@@ -13,7 +13,6 @@
 
     <div class="auth-container">
         <div class="auth-card">
-            <!-- Logo -->
             <div class="auth-logo">
                 <i class="fas fa-car-side"></i>
                 <span>Ride<span>Pool</span>+</span>
@@ -22,7 +21,6 @@
             <h2>Register as a Driver</h2>
             <p class="auth-subtitle">Join our network and start earning today</p>
 
-            <!-- Registration Form -->
             <form id="driverRegisterForm" class="auth-form">
                 <div class="form-row">
                     <div class="form-group">
@@ -45,15 +43,13 @@
                     <input type="tel" id="phone" placeholder="+234 800 000 0000" required />
                 </div>
 
-                <!-- Driver Specific Fields -->
                 <div class="form-group">
                     <label for="vehicleType"><i class="fas fa-car"></i> Vehicle Type</label>
                     <select id="vehicleType" required>
                         <option value="">Select vehicle type...</option>
-                        <option value="sedan">Sedan</option>
-                        <option value="suv">SUV</option>
-                        <option value="mini">Mini Van</option>
-                        <option value="bike">Motorcycle</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Mini Van">Mini Van</option>
                     </select>
                 </div>
 
@@ -100,6 +96,123 @@
         </div>
     </div>
 
-    <script src="auth.js"></script>
+    <script type="module">
+        import { signUp } from '../../assets/js/supabase-client.js'
+
+        function showNotification(message, type) {
+            const existing = document.querySelector('.auth-notification');
+            if (existing) existing.remove();
+
+            const notification = document.createElement('div');
+            notification.className = 'auth-notification';
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; padding: 12px 20px;
+                border-radius: 10px; background: ${type === 'success' ? '#2B8A3E' : '#C92A2A'};
+                color: #FFFFFF; font-size: 14px; font-weight: 500;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 9999;
+                display: flex; align-items: center; gap: 10px;
+                animation: slideDown 0.3s ease; border: none;
+            `;
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            notification.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        document.querySelectorAll('.password-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const wrapper = this.closest('.password-wrapper');
+                const input = wrapper.querySelector('input');
+                const icon = this.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+        });
+
+        const registerForm = document.getElementById('driverRegisterForm');
+
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const vehicleType = document.getElementById('vehicleType').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const termsAccepted = document.getElementById('termsAccepted').checked;
+
+            if (!firstName || !lastName || !email || !phone || !vehicleType || !password) {
+                showNotification('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showNotification('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('Password must be at least 6 characters.', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match.', 'error');
+                return;
+            }
+
+            if (!termsAccepted) {
+                showNotification('Please accept the Terms of Service.', 'error');
+                return;
+            }
+
+            const submitBtn = this.querySelector('.btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            submitBtn.disabled = true;
+
+            try {
+                const userData = {
+                    name: firstName + ' ' + lastName,
+                    phone: phone,
+                    vehicleType: vehicleType,
+                    vehicleCapacity: 4
+                };
+
+                await signUp(email, password, userData, 'driver');
+
+                showNotification('🚗 Driver account created successfully! Redirecting to login...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                showNotification('❌ Registration failed: ' + error.message, 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
 </body>
 </html>

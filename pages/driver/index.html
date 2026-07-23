@@ -4,21 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Driver - RidePool+</title>
-    <meta name="description" content="View and manage your ride-pooling and delivery assignments in Owerri's urban-rural transport network." />
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <!-- Leaflet.js for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Global Styles -->
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <!-- Page Specific Styles -->
     <link rel="stylesheet" href="driver.css" />
 </head>
 <body>
 
-    <!-- ===== NAVIGATION ===== -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -30,25 +23,23 @@
                 <li><a href="../dashboard/index.html">Dashboard</a></li>
                 <li><a href="../passenger/index.html">Passenger</a></li>
                 <li><a href="../driver/index.html" class="active">Driver</a></li>
+                <li><a href="../delivery/index.html">Send Delivery</a></li>
                 <li><a href="../admin/index.html">Admin</a></li>
+                <li><a href="../auth/login.html" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Sign In</a></li>
             </ul>
-            <a href="../dashboard/index.html" class="btn btn-primary btn-nav">Launch Simulation</a>
             <button class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </nav>
 
-    <!-- ===== PAGE HEADER ===== -->
     <div class="page-header">
         <div class="page-header-content">
             <div class="header-left">
-                <div class="driver-avatar">
-                    <span>🚗</span>
-                </div>
+                <div class="driver-avatar"><span>🚗</span></div>
                 <div class="driver-info">
-                    <h1>Chidi Okonkwo</h1>
-                    <p><i class="fas fa-id-card"></i> Driver ID: #D014</p>
+                    <h1 id="driverName">Chidi Okonkwo</h1>
+                    <p><i class="fas fa-id-card"></i> Driver ID: <span id="driverId">#D014</span></p>
                 </div>
             </div>
             <div class="header-right">
@@ -64,7 +55,6 @@
         </div>
     </div>
 
-    <!-- ===== NOTIFICATION BANNER ===== -->
     <div class="notification-banner" id="notificationBanner">
         <div class="notification-content">
             <i class="fas fa-bell"></i>
@@ -80,149 +70,83 @@
         </button>
     </div>
 
-    <!-- ===== MAIN CONTENT ===== -->
     <div class="driver-container">
 
-        <!-- ===== ASSIGNMENT CARD ===== -->
         <div class="assignment-card card">
             <div class="card-header">
                 <h2><i class="fas fa-clipboard-list"></i> Current Assignment</h2>
                 <span class="badge badge-primary" id="assignmentType">Ride-Pooling</span>
             </div>
 
-            <!-- ===== RIDE-POOLING ASSIGNMENT ===== -->
             <div class="assignment-content" id="ridePoolingAssignment">
                 <div class="passenger-ride-group">
                     <div class="passenger-ride">
                         <div class="passenger-ride-header">
                             <span class="passenger-number">Passenger 1</span>
-                            <span class="badge badge-success">Picked Up</span>
+                            <span class="badge badge-success" id="pax1Status">Picked Up</span>
                         </div>
                         <div class="route-details">
-                            <div class="route-stop pickup">
-                                <i class="fas fa-map-pin"></i>
-                                <span>FUTO Gate</span>
-                            </div>
-                            <div class="route-arrow">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-                            <div class="route-stop dropoff">
-                                <i class="fas fa-flag-checkered"></i>
-                                <span>World Bank</span>
-                            </div>
+                            <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span>FUTO Gate</span></div>
+                            <div class="route-arrow"><i class="fas fa-arrow-down"></i></div>
+                            <div class="route-stop dropoff"><i class="fas fa-flag-checkered"></i> <span>World Bank</span></div>
                         </div>
                     </div>
-
                     <div class="passenger-ride">
                         <div class="passenger-ride-header">
                             <span class="passenger-number">Passenger 2</span>
-                            <span class="badge badge-warning">Waiting</span>
+                            <span class="badge badge-warning" id="pax2Status">Waiting</span>
                         </div>
                         <div class="route-details">
-                            <div class="route-stop pickup">
-                                <i class="fas fa-map-pin"></i>
-                                <span>Concorde Hotel</span>
-                            </div>
-                            <div class="route-arrow">
-                                <i class="fas fa-arrow-down"></i>
-                            </div>
-                            <div class="route-stop dropoff">
-                                <i class="fas fa-flag-checkered"></i>
-                                <span>World Bank</span>
-                            </div>
+                            <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span>Concorde Hotel</span></div>
+                            <div class="route-arrow"><i class="fas fa-arrow-down"></i></div>
+                            <div class="route-stop dropoff"><i class="fas fa-flag-checkered"></i> <span>World Bank</span></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="assignment-summary">
-                    <div class="summary-item">
-                        <span class="summary-label">Total Distance</span>
-                        <span class="summary-value">12.4 km</span>
-                    </div>
+                    <div class="summary-item"><span class="summary-label">Total Distance</span><span class="summary-value">12.4 km</span></div>
                     <div class="summary-divider"></div>
-                    <div class="summary-item">
-                        <span class="summary-label">Estimated Earnings</span>
-                        <span class="summary-value">₦2,400</span>
-                    </div>
+                    <div class="summary-item"><span class="summary-label">Estimated Earnings</span><span class="summary-value">₦2,400</span></div>
                     <div class="summary-divider"></div>
-                    <div class="summary-item">
-                        <span class="summary-label">Pickup Window</span>
-                        <span class="summary-value">5 min</span>
-                    </div>
+                    <div class="summary-item"><span class="summary-label">Pickup Window</span><span class="summary-value">5 min</span></div>
                 </div>
 
                 <div class="assignment-actions">
-                    <button class="btn btn-success" id="startTripBtn">
-                        <i class="fas fa-play"></i> Start Trip
-                    </button>
-                    <button class="btn btn-outline">
-                        <i class="fas fa-route"></i> View Route
-                    </button>
-                    <button class="btn btn-danger">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
+                    <button class="btn btn-success" id="startTripBtn"><i class="fas fa-play"></i> Start Trip</button>
+                    <button class="btn btn-outline"><i class="fas fa-route"></i> View Route</button>
+                    <button class="btn btn-danger"><i class="fas fa-times"></i> Cancel</button>
                 </div>
             </div>
 
-            <!-- ===== DELIVERY ASSIGNMENT (Hidden by default) ===== -->
             <div class="assignment-content" id="deliveryAssignment" style="display: none;">
                 <div class="delivery-details">
                     <div class="delivery-package">
-                        <div class="package-icon">
-                            <i class="fas fa-box"></i>
-                        </div>
+                        <div class="package-icon"><i class="fas fa-box"></i></div>
                         <div class="package-info">
                             <h4>Small Parcel</h4>
                             <p>Weight: 2.5 kg</p>
-                            <p><span class="badge badge-primary">Express</span></p>
+                            <p><span class="badge badge-primary" id="deliveryStatus">Express</span></p>
                         </div>
                     </div>
-
                     <div class="route-details">
-                        <div class="route-stop pickup">
-                            <i class="fas fa-store"></i>
-                            <div>
-                                <span class="route-label">Pickup</span>
-                                <span>Obinze Market</span>
-                            </div>
-                        </div>
-                        <div class="route-arrow">
-                            <i class="fas fa-arrow-right"></i>
-                        </div>
-                        <div class="route-stop dropoff">
-                            <i class="fas fa-home"></i>
-                            <div>
-                                <span class="route-label">Dropoff</span>
-                                <span>World Bank Estate</span>
-                            </div>
-                        </div>
+                        <div class="route-stop pickup"><i class="fas fa-store"></i> <div><span class="route-label">Pickup</span><span>Obinze Market</span></div></div>
+                        <div class="route-arrow"><i class="fas fa-arrow-right"></i></div>
+                        <div class="route-stop dropoff"><i class="fas fa-home"></i> <div><span class="route-label">Dropoff</span><span>World Bank Estate</span></div></div>
                     </div>
-
                     <div class="assignment-summary">
-                        <div class="summary-item">
-                            <span class="summary-label">Delivery Fee</span>
-                            <span class="summary-value">₦1,200</span>
-                        </div>
+                        <div class="summary-item"><span class="summary-label">Delivery Fee</span><span class="summary-value">₦1,200</span></div>
                         <div class="summary-divider"></div>
-                        <div class="summary-item">
-                            <span class="summary-label">Time Window</span>
-                            <span class="summary-value">45 min</span>
-                        </div>
+                        <div class="summary-item"><span class="summary-label">Time Window</span><span class="summary-value">45 min</span></div>
                     </div>
-
                     <div class="assignment-actions">
-                        <button class="btn btn-success" id="startDeliveryBtn">
-                            <i class="fas fa-play"></i> Start Delivery
-                        </button>
-                        <button class="btn btn-outline">
-                            <i class="fas fa-route"></i> View Route
-                        </button>
+                        <button class="btn btn-success" id="startDeliveryBtn"><i class="fas fa-play"></i> Start Delivery</button>
+                        <button class="btn btn-outline"><i class="fas fa-route"></i> View Route</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ===== ROUTE MAP ===== -->
         <div class="route-map-card card">
             <div class="card-header">
                 <h2><i class="fas fa-map"></i> Optimised Route</h2>
@@ -230,58 +154,28 @@
             </div>
             <div id="routeMap"></div>
             <div class="route-stops">
-                <div class="route-stop-item active">
-                    <span class="stop-number">1</span>
-                    <span class="stop-label">Pickup A</span>
-                    <span class="stop-location">FUTO Gate</span>
-                </div>
-                <div class="route-stop-item">
-                    <span class="stop-number">2</span>
-                    <span class="stop-label">Pickup B</span>
-                    <span class="stop-location">Concorde Hotel</span>
-                </div>
-                <div class="route-stop-item">
-                    <span class="stop-number">3</span>
-                    <span class="stop-label">Dropoff A</span>
-                    <span class="stop-location">World Bank</span>
-                </div>
-                <div class="route-stop-item">
-                    <span class="stop-number">4</span>
-                    <span class="stop-label">Dropoff B</span>
-                    <span class="stop-location">World Bank</span>
-                </div>
+                <div class="route-stop-item active"><span class="stop-number">1</span><span class="stop-label">Pickup A</span><span class="stop-location">FUTO Gate</span></div>
+                <div class="route-stop-item"><span class="stop-number">2</span><span class="stop-label">Pickup B</span><span class="stop-location">Concorde Hotel</span></div>
+                <div class="route-stop-item"><span class="stop-number">3</span><span class="stop-label">Dropoff A</span><span class="stop-location">World Bank</span></div>
+                <div class="route-stop-item"><span class="stop-number">4</span><span class="stop-label">Dropoff B</span><span class="stop-location">World Bank</span></div>
             </div>
         </div>
 
-        <!-- ===== EARNINGS SUMMARY ===== -->
         <div class="earnings-summary card">
             <div class="card-header">
                 <h2><i class="fas fa-wallet"></i> Today's Earnings</h2>
-                <span class="badge badge-success">+12%</span>
+                <span class="badge badge-success" id="earningsChange">+12%</span>
             </div>
             <div class="earnings-grid">
-                <div class="earning-item">
-                    <span class="earning-label">Today's Earnings</span>
-                    <span class="earning-value">₦12,500</span>
-                </div>
-                <div class="earning-item">
-                    <span class="earning-label">Trips Completed</span>
-                    <span class="earning-value">8</span>
-                </div>
-                <div class="earning-item">
-                    <span class="earning-label">Available Deliveries</span>
-                    <span class="earning-value">3</span>
-                </div>
-                <div class="earning-item">
-                    <span class="earning-label">Rating</span>
-                    <span class="earning-value">⭐ 4.8</span>
-                </div>
+                <div class="earning-item"><span class="earning-label">Today's Earnings</span><span class="earning-value" id="todayEarnings">₦12,500</span></div>
+                <div class="earning-item"><span class="earning-label">Trips Completed</span><span class="earning-value" id="tripsCompleted">8</span></div>
+                <div class="earning-item"><span class="earning-label">Available Deliveries</span><span class="earning-value" id="availableDeliveries">3</span></div>
+                <div class="earning-item"><span class="earning-label">Rating</span><span class="earning-value">⭐ 4.8</span></div>
             </div>
         </div>
 
     </div>
 
-    <!-- ===== FOOTER ===== -->
     <footer>
         <div class="footer-container">
             <p>&copy; 2026 RidePool+ &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System &bull; Owerri Case Study</p>
@@ -293,12 +187,227 @@
         </div>
     </footer>
 
-    <!-- Leaflet.js -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+        import { supabase, getCurrentUser, updateDriverStatus, updateDriverLocation } from '../../assets/js/supabase-client.js'
+
+        // Get current user
+        const user = await getCurrentUser()
+        if (!user) {
+            window.location.href = '../auth/login.html'
+        }
+
+        // Get driver profile
+        const { data: driver, error: driverError } = await supabase
+            .from('drivers')
+            .select('*')
+            .eq('driver_id', user.id)
+            .single()
+
+        if (driverError || !driver) {
+            alert('Driver profile not found. Please register as a driver first.')
+            window.location.href = '../auth/driver-register.html'
+        }
+
+        // Set driver info
+        document.getElementById('driverName').textContent = driver.name || 'Driver'
+        document.getElementById('driverId').textContent = driver.driver_id?.slice(0, 8) || 'Unknown'
+
+        // Notification function
+        function showNotification(message, type) {
+            const existing = document.querySelector('.driver-notification');
+            if (existing) existing.remove();
+
+            const notification = document.createElement('div');
+            notification.className = 'driver-notification';
+            notification.style.cssText = `
+                position: fixed; bottom: 24px; right: 24px; padding: 14px 20px;
+                border-radius: 12px; background: ${type === 'success' ? '#2B8A3E' : type === 'error' ? '#C92A2A' : '#3B2A60'};
+                color: #FFFFFF; font-size: 14px; font-weight: 500;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 9999;
+                display: flex; align-items: center; gap: 12px; max-width: 400px;
+                animation: slideUp 0.3s ease; border: none;
+            `;
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            notification.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Status toggle
+        const statusToggle = document.getElementById('statusToggle')
+        const statusBadge = document.getElementById('statusBadge')
+        const statusText = document.getElementById('statusText')
+
+        statusToggle.addEventListener('change', async function() {
+            const newStatus = this.checked ? 'idle' : 'offline'
+            const label = this.checked ? 'Online' : 'Offline'
+            statusBadge.className = `status-badge ${this.checked ? 'online' : 'offline'}`
+            statusText.textContent = label
+
+            try {
+                await updateDriverStatus(driver.driver_id, newStatus)
+                showNotification(`✅ Status updated to ${label}`, 'success')
+            } catch (error) {
+                showNotification('❌ Error updating status: ' + error.message, 'error')
+                this.checked = !this.checked
+            }
+        })
+
+        // Notification banner
+        const notificationBanner = document.getElementById('notificationBanner')
+        const closeNotification = document.getElementById('closeNotification')
+        const acceptDelivery = document.getElementById('acceptDelivery')
+        const declineDelivery = document.getElementById('declineDelivery')
+
+        closeNotification.addEventListener('click', () => notificationBanner.classList.add('hidden'))
+
+        acceptDelivery.addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-check"></i> Accepted!'
+            this.style.background = '#2B8A3E'
+
+            const deliveryAssignment = document.getElementById('deliveryAssignment')
+            const rideAssignment = document.getElementById('ridePoolingAssignment')
+            if (deliveryAssignment && rideAssignment) {
+                rideAssignment.style.display = 'none'
+                deliveryAssignment.style.display = 'block'
+                document.getElementById('assignmentType').textContent = 'Delivery'
+                document.getElementById('assignmentType').className = 'badge badge-warning'
+            }
+
+            setTimeout(() => {
+                notificationBanner.classList.add('hidden')
+                this.innerHTML = '<i class="fas fa-check"></i> Accept'
+                this.style.background = ''
+            }, 1500)
+        })
+
+        declineDelivery.addEventListener('click', () => notificationBanner.classList.add('hidden'))
+
+        // Start trip buttons
+        document.getElementById('startTripBtn').addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...'
+            this.disabled = true
+
+            setTimeout(async () => {
+                this.innerHTML = '<i class="fas fa-check"></i> Trip Started!'
+                this.style.background = '#2B8A3E'
+                document.querySelector('.passenger-ride-header .badge-success').textContent = 'In Progress'
+
+                try {
+                    await updateDriverStatus(driver.driver_id, 'en-route')
+                    showNotification('🚗 Trip started!', 'success')
+                } catch (error) {
+                    showNotification('❌ Error: ' + error.message, 'error')
+                }
+
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-play"></i> Start Trip'
+                    this.disabled = false
+                    this.style.background = ''
+                }, 2000)
+            }, 1500)
+        })
+
+        document.getElementById('startDeliveryBtn').addEventListener('click', function() {
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...'
+            this.disabled = true
+
+            setTimeout(async () => {
+                this.innerHTML = '<i class="fas fa-check"></i> Delivery Started!'
+                this.style.background = '#2B8A3E'
+                const statusBadge = document.querySelector('.delivery-package .badge')
+                if (statusBadge) {
+                    statusBadge.textContent = 'In Progress'
+                    statusBadge.className = 'badge badge-success'
+                }
+
+                try {
+                    await updateDriverStatus(driver.driver_id, 'delivering')
+                    showNotification('📦 Delivery started!', 'success')
+                } catch (error) {
+                    showNotification('❌ Error: ' + error.message, 'error')
+                }
+
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-play"></i> Start Delivery'
+                    this.disabled = false
+                    this.style.background = ''
+                }, 2000)
+            }, 1500)
+        })
+
+        // Route map (Leaflet)
+        const routeMapContainer = document.getElementById('routeMap')
+        if (routeMapContainer && typeof L !== 'undefined') {
+            const map = L.map('routeMap', { center: [5.46, 7.02], zoom: 13, zoomControl: false, attributionControl: false })
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '' }).addTo(map)
+
+            const routePoints = [[5.414, 7.016], [5.460, 7.040], [5.478, 7.025]]
+            const polyline = L.polyline(routePoints, { color: '#7b2fbe', weight: 4, opacity: 0.7, dashArray: '8,6' }).addTo(map)
+
+            routePoints.forEach((point, index) => {
+                L.marker([point[0], point[1]], {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<div style="background:#3B2A60;color:#FFF;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #D3C5F6;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${index + 1}</div>`,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    })
+                }).bindTooltip(['Pickup A', 'Pickup B', 'Dropoff A'][index], { permanent: false, direction: 'top' }).addTo(map)
+            })
+
+            map.fitBounds(polyline.getBounds(), { padding: [40, 40], maxZoom: 14 })
+        } else {
+            routeMapContainer.innerHTML = `
+                <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#F0EDF5;border-radius:12px;color:#6C757D;flex-direction:column;gap:8px;">
+                    <i class="fas fa-map" style="font-size:32px;color:#D3C5F6;"></i>
+                    <span>Route Map Loading...</span>
+                </div>
+            `
+        }
+
+        // Route stop interactions
+        document.querySelectorAll('.route-stop-item').forEach((item, index) => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.route-stop-item').forEach(el => el.classList.remove('active'))
+                this.classList.add('active')
+            })
+        })
+
+        // Keyboard shortcuts
+        console.log('⌨️ Keyboard Shortcuts: [S] Toggle Status, [A] Accept Delivery, [D] Decline, [T] Start Trip')
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 's' || e.key === 'S') {
+                statusToggle.checked = !statusToggle.checked
+                statusToggle.dispatchEvent(new Event('change'))
+            }
+            if ((e.key === 'a' || e.key === 'A') && !notificationBanner.classList.contains('hidden')) {
+                acceptDelivery.click()
+            }
+            if ((e.key === 'd' || e.key === 'D') && !notificationBanner.classList.contains('hidden')) {
+                declineDelivery.click()
+            }
+            if (e.key === 't' || e.key === 'T') {
+                const type = document.getElementById('assignmentType').textContent
+                if (type === 'Ride-Pooling') document.getElementById('startTripBtn').click()
+                else if (type === 'Delivery') document.getElementById('startDeliveryBtn').click()
+            }
+        })
     </script>
-    <!-- Global JavaScript -->
-    <script src="../../assets/js/main.js"></script>
-    <!-- Page Specific JavaScript -->
-    <script src="driver.js"></script>
+
+    <style>
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+
 </body>
 </html>

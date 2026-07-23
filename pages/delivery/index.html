@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create Delivery - RidePool+</title>
+    <title>Send Delivery - RidePool+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <!-- Leaflet.js for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="../../assets/css/style.css" />
     <link rel="stylesheet" href="delivery.css" />
 </head>
 <body>
 
-    <!-- ===== NAVIGATION ===== -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -35,7 +33,6 @@
         </div>
     </nav>
 
-    <!-- ===== PAGE HEADER ===== -->
     <div class="page-header">
         <div class="page-header-content">
             <div>
@@ -43,30 +40,16 @@
                 <p>Send parcels, packages, and goods across Owerri's urban-rural network</p>
             </div>
             <div class="header-stats">
-                <div class="stat-badge">
-                    <span class="stat-number" id="totalDeliveries">0</span>
-                    <span class="stat-label">Total Sent</span>
-                </div>
-                <div class="stat-badge pending">
-                    <span class="stat-number" id="pendingDeliveries">0</span>
-                    <span class="stat-label">Pending</span>
-                </div>
-                <div class="stat-badge in-progress">
-                    <span class="stat-number" id="inProgressDeliveries">0</span>
-                    <span class="stat-label">In Progress</span>
-                </div>
-                <div class="stat-badge completed">
-                    <span class="stat-number" id="completedDeliveries">0</span>
-                    <span class="stat-label">Completed</span>
-                </div>
+                <div class="stat-badge"><span class="stat-number" id="totalDeliveries">0</span><span class="stat-label">Total Sent</span></div>
+                <div class="stat-badge pending"><span class="stat-number" id="pendingDeliveries">0</span><span class="stat-label">Pending</span></div>
+                <div class="stat-badge in-progress"><span class="stat-number" id="inProgressDeliveries">0</span><span class="stat-label">In Progress</span></div>
+                <div class="stat-badge completed"><span class="stat-number" id="completedDeliveries">0</span><span class="stat-label">Completed</span></div>
             </div>
         </div>
     </div>
 
-    <!-- ===== MAIN CONTENT ===== -->
     <div class="delivery-container">
 
-        <!-- ===== CREATE DELIVERY FORM ===== -->
         <div class="create-delivery-card card">
             <div class="card-header">
                 <h2><i class="fas fa-plus-circle"></i> New Delivery Request</h2>
@@ -74,7 +57,6 @@
             </div>
 
             <form id="deliveryForm" class="delivery-form">
-                <!-- Step 1: Pickup Details -->
                 <div class="form-step">
                     <h3><i class="fas fa-store"></i> Pickup Details</h3>
                     <div class="form-group">
@@ -90,7 +72,6 @@
 
                 <div class="form-divider"></div>
 
-                <!-- Step 2: Dropoff Details -->
                 <div class="form-step">
                     <h3><i class="fas fa-flag-checkered"></i> Dropoff Details</h3>
                     <div class="form-group">
@@ -102,7 +83,6 @@
 
                 <div class="form-divider"></div>
 
-                <!-- Step 3: Package Details -->
                 <div class="form-step">
                     <h3><i class="fas fa-box"></i> Package Details</h3>
                     <div class="form-row">
@@ -129,7 +109,6 @@
 
                 <div class="form-divider"></div>
 
-                <!-- Step 4: Time Window -->
                 <div class="form-step">
                     <h3><i class="fas fa-clock"></i> Time Window</h3>
                     <div class="form-row">
@@ -143,14 +122,13 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="dropoffDeadline">Dropoff Deadline</label>
-                        <input type="datetime-local" id="dropoffDeadline" required />
+                        <label for="dropoffWindowEnd">Dropoff Deadline</label>
+                        <input type="datetime-local" id="dropoffWindowEnd" required />
                     </div>
                 </div>
 
                 <div class="form-divider"></div>
 
-                <!-- Step 5: Sender Details -->
                 <div class="form-step">
                     <h3><i class="fas fa-user"></i> Your Details</h3>
                     <div class="form-row">
@@ -173,9 +151,7 @@
             </form>
         </div>
 
-        <!-- ===== MAP SIDEBAR ===== -->
         <div class="delivery-map-sidebar">
-            <!-- Map -->
             <div class="map-card">
                 <div class="map-header">
                     <h3><i class="fas fa-map"></i> Delivery Map</h3>
@@ -189,36 +165,20 @@
                 </div>
             </div>
 
-            <!-- Estimated Fee -->
             <div class="fee-estimate-card card">
                 <h3><i class="fas fa-calculator"></i> Fee Estimate</h3>
                 <div class="fee-breakdown">
-                    <div class="fee-row">
-                        <span>Base Fee</span>
-                        <span>₦500</span>
-                    </div>
-                    <div class="fee-row">
-                        <span>Distance</span>
-                        <span id="feeDistance">0 km</span>
-                    </div>
-                    <div class="fee-row">
-                        <span>Package Size</span>
-                        <span id="feeSize">Small</span>
-                    </div>
-                    <div class="fee-row total">
-                        <span>Total Estimated Fee</span>
-                        <span id="feeTotal">₦500</span>
-                    </div>
+                    <div class="fee-row"><span>Base Fee</span><span>₦500</span></div>
+                    <div class="fee-row"><span>Distance</span><span id="feeDistance">0 km</span></div>
+                    <div class="fee-row"><span>Package Size</span><span id="feeSize">Small</span></div>
+                    <div class="fee-row total"><span>Total Estimated Fee</span><span id="feeTotal">₦500</span></div>
                 </div>
-                <p class="fee-note">
-                    <i class="fas fa-info-circle"></i> Final fee may vary based on demand and availability
-                </p>
+                <p class="fee-note"><i class="fas fa-info-circle"></i> Final fee may vary based on demand and availability</p>
             </div>
         </div>
 
     </div>
 
-    <!-- ===== MY DELIVERIES SECTION ===== -->
     <section class="my-deliveries-section">
         <div class="my-deliveries-header">
             <h2><i class="fas fa-history"></i> My Deliveries</h2>
@@ -230,9 +190,7 @@
                 <button class="filter-btn" data-filter="delivered">Delivered</button>
             </div>
         </div>
-
         <div class="my-deliveries-list" id="myDeliveriesList">
-            <!-- Deliveries will be dynamically added here -->
             <div class="empty-state" id="emptyState">
                 <i class="fas fa-box-open"></i>
                 <h3>No deliveries yet</h3>
@@ -241,7 +199,6 @@
         </div>
     </section>
 
-    <!-- ===== FOOTER ===== -->
     <footer>
         <div class="footer-container">
             <p>&copy; 2026 RidePool+ &bull; Delivery Management &bull; Hybrid Ride-Pooling &amp; Delivery Optimisation System</p>
@@ -253,12 +210,354 @@
         </div>
     </footer>
 
-    <!-- Leaflet.js -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+        import { supabase, createDeliveryTask, getPendingDeliveries, getCurrentUser } from '../../assets/js/supabase-client.js'
+
+        // Get current user
+        const user = await getCurrentUser()
+        if (!user) {
+            window.location.href = '../auth/login.html'
+        }
+
+        // ================================================================
+        // STATE
+        // ================================================================
+
+        let deliveries = []
+        let pickupMarker = null
+        let dropoffMarker = null
+        let routeLine = null
+        let map = null
+        let pickupCoords = null
+        let dropoffCoords = null
+
+        // ================================================================
+        // NOTIFICATION
+        // ================================================================
+
+        function showNotification(message, type) {
+            const existing = document.querySelector('.delivery-notification');
+            if (existing) existing.remove();
+
+            const notification = document.createElement('div');
+            notification.className = 'delivery-notification';
+            notification.style.cssText = `
+                position: fixed; bottom: 24px; right: 24px; padding: 14px 20px;
+                border-radius: 12px; background: ${type === 'success' ? '#2B8A3E' : type === 'error' ? '#C92A2A' : '#3B2A60'};
+                color: #FFFFFF; font-size: 14px; font-weight: 500;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 9999;
+                display: flex; align-items: center; gap: 12px; max-width: 400px;
+                animation: slideUp 0.3s ease; border: none;
+            `;
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            notification.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // ================================================================
+        // MAP
+        // ================================================================
+
+        const mapContainer = document.getElementById('deliveryMap')
+
+        if (mapContainer && typeof L !== 'undefined') {
+            map = L.map('deliveryMap', { center: [5.46, 7.02], zoom: 12, zoomControl: false, attributionControl: false })
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '' }).addTo(map)
+
+            map.on('click', function(e) {
+                const lat = e.latlng.lat.toFixed(6)
+                const lng = e.latlng.lng.toFixed(6)
+
+                if (!pickupCoords) {
+                    pickupCoords = { lat: parseFloat(lat), lng: parseFloat(lng) }
+                    updateMapMarker('pickup', lat, lng)
+                    showNotification('📍 Pickup location set on map', 'info')
+                } else if (!dropoffCoords) {
+                    dropoffCoords = { lat: parseFloat(lat), lng: parseFloat(lng) }
+                    updateMapMarker('dropoff', lat, lng)
+                    showNotification('📍 Dropoff location set on map', 'info')
+                } else {
+                    showNotification('ℹ️ Both locations already set. Click "Create" to submit.', 'info')
+                }
+                updateFeeEstimate()
+            })
+        }
+
+        function updateMapMarker(type, lat, lng) {
+            if (!map) return
+
+            const icon = L.divIcon({
+                className: '',
+                html: `<div style="background:${type === 'pickup' ? '#2B8A3E' : '#E85D04'};width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.2);"></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            })
+
+            const marker = L.marker([lat, lng], { icon })
+                .bindTooltip(type === 'pickup' ? '📦 Pickup' : '🏠 Dropoff', { permanent: false })
+                .addTo(map)
+
+            if (type === 'pickup') {
+                if (pickupMarker) map.removeLayer(pickupMarker)
+                pickupMarker = marker
+            } else {
+                if (dropoffMarker) map.removeLayer(dropoffMarker)
+                dropoffMarker = marker
+            }
+
+            if (pickupMarker && dropoffMarker) {
+                if (routeLine) map.removeLayer(routeLine)
+                routeLine = L.polyline([pickupMarker.getLatLng(), dropoffMarker.getLatLng()], {
+                    color: '#7B2FBE', weight: 3, opacity: 0.7, dashArray: '8,6'
+                }).addTo(map)
+
+                const bounds = L.latLngBounds([pickupMarker.getLatLng(), dropoffMarker.getLatLng()])
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 })
+            }
+        }
+
+        // ================================================================
+        // FEE ESTIMATE
+        // ================================================================
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371
+            const dLat = (lat2 - lat1) * Math.PI / 180
+            const dLon = (lon2 - lon1) * Math.PI / 180
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+        }
+
+        function updateFeeEstimate() {
+            const packageType = document.getElementById('packageType').value
+            const weight = parseFloat(document.getElementById('packageWeight').value) || 0
+
+            let distance = 0
+            if (pickupCoords && dropoffCoords) {
+                distance = haversine(pickupCoords.lat, pickupCoords.lng, dropoffCoords.lat, dropoffCoords.lng)
+            }
+
+            const sizeMultipliers = { 'small': 1, 'medium': 1.5, 'large': 2, 'extra': 2.5 }
+            const sizeMultiplier = sizeMultipliers[packageType] || 1
+            const weightMultiplier = Math.max(1, weight / 2)
+
+            const totalFee = 500 + (distance * 80) + ((sizeMultiplier - 1) * 200) + ((weightMultiplier - 1) * 100)
+
+            document.getElementById('feeDistance').textContent = distance.toFixed(1) + ' km'
+            document.getElementById('feeSize').textContent = packageType.charAt(0).toUpperCase() + packageType.slice(1) || 'Small'
+            document.getElementById('feeTotal').textContent = '₦' + Math.round(totalFee)
+            document.getElementById('estimatedFee').textContent = '₦' + Math.round(totalFee)
+        }
+
+        document.getElementById('packageType').addEventListener('change', updateFeeEstimate)
+        document.getElementById('packageWeight').addEventListener('input', updateFeeEstimate)
+
+        // Address to coords (simple mapping)
+        function getCoordinatesFromAddress(address) {
+            const locations = {
+                'obinze': { lat: 5.362, lng: 6.956 },
+                'ihiagwa': { lat: 5.400, lng: 6.989 },
+                'nekede': { lat: 5.442, lng: 6.970 },
+                'umuguma': { lat: 5.505, lng: 6.965 },
+                'futo': { lat: 5.414, lng: 7.016 },
+                'world bank': { lat: 5.478, lng: 7.025 },
+                'concorde': { lat: 5.460, lng: 7.040 },
+                'owerri': { lat: 5.483, lng: 7.035 }
+            }
+            for (const [key, coords] of Object.entries(locations)) {
+                if (address.toLowerCase().includes(key)) return coords
+            }
+            return null
+        }
+
+        document.getElementById('pickupAddress').addEventListener('change', function() {
+            const coords = getCoordinatesFromAddress(this.value)
+            if (coords) {
+                pickupCoords = coords
+                updateMapMarker('pickup', coords.lat, coords.lng)
+                updateFeeEstimate()
+                showNotification('📍 Pickup location updated on map', 'info')
+            }
+        })
+
+        document.getElementById('dropoffAddress').addEventListener('change', function() {
+            const coords = getCoordinatesFromAddress(this.value)
+            if (coords) {
+                dropoffCoords = coords
+                updateMapMarker('dropoff', coords.lat, coords.lng)
+                updateFeeEstimate()
+                showNotification('📍 Dropoff location updated on map', 'info')
+            }
+        })
+
+        // ================================================================
+        // SUBMIT DELIVERY
+        // ================================================================
+
+        const deliveryForm = document.getElementById('deliveryForm')
+
+        deliveryForm.addEventListener('submit', async function(e) {
+            e.preventDefault()
+
+            const pickupAddress = document.getElementById('pickupAddress').value
+            const dropoffAddress = document.getElementById('dropoffAddress').value
+            const packageType = document.getElementById('packageType').value
+            const packageWeight = document.getElementById('packageWeight').value
+            const senderName = document.getElementById('senderName').value
+            const senderPhone = document.getElementById('senderPhone').value
+
+            if (!pickupAddress || !dropoffAddress || !packageType || !packageWeight || !senderName || !senderPhone) {
+                showNotification('Please fill in all required fields.', 'error')
+                return
+            }
+
+            if (!pickupCoords || !dropoffCoords) {
+                showNotification('Please set pickup and dropoff locations on the map.', 'error')
+                return
+            }
+
+            const submitBtn = this.querySelector('.btn')
+            const originalText = submitBtn.innerHTML
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...'
+            submitBtn.disabled = true
+
+            try {
+                const taskData = {
+                    senderName,
+                    senderPhone,
+                    pickupLat: pickupCoords.lat,
+                    pickupLng: pickupCoords.lng,
+                    dropoffLat: dropoffCoords.lat,
+                    dropoffLng: dropoffCoords.lng,
+                    pickupWindowStart: document.getElementById('pickupWindowStart').value,
+                    pickupWindowEnd: document.getElementById('pickupWindowEnd').value,
+                    dropoffWindowStart: document.getElementById('pickupWindowStart').value,
+                    dropoffWindowEnd: document.getElementById('dropoffWindowEnd').value,
+                    description: document.getElementById('packageDescription').value || packageType + ' parcel'
+                }
+
+                const result = await createDeliveryTask(taskData)
+
+                // Add to UI
+                const list = document.getElementById('myDeliveriesList')
+                const emptyState = document.getElementById('emptyState')
+                if (emptyState) emptyState.style.display = 'none'
+
+                const fee = document.getElementById('feeTotal').textContent
+                const item = document.createElement('div')
+                item.className = 'delivery-item'
+                item.dataset.status = 'pending'
+                item.innerHTML = `
+                    <div class="delivery-status"><span class="status-badge pending">Pending</span></div>
+                    <div class="delivery-info">
+                        <div class="delivery-header">
+                            <h4>📦 ${packageType.charAt(0).toUpperCase() + packageType.slice(1)} Parcel <span class="delivery-id">#${result.task_id.slice(0, 8)}</span></h4>
+                            <span style="font-size:12px;color:#6C757D;">Just now</span>
+                        </div>
+                        <div class="delivery-route">
+                            <span class="route-point pickup"><i class="fas fa-store"></i> ${pickupAddress}</span>
+                            <span class="route-arrow">→</span>
+                            <span class="route-point dropoff"><i class="fas fa-home"></i> ${dropoffAddress}</span>
+                        </div>
+                        <div class="delivery-meta">
+                            <span><i class="fas fa-weight-hanging"></i> ${packageWeight} kg</span>
+                            <span><i class="fas fa-tag"></i> ${fee}</span>
+                            <span><i class="fas fa-user"></i> ${senderName}</span>
+                        </div>
+                    </div>
+                    <div class="delivery-actions">
+                        <button class="btn btn-outline btn-sm btn-cancel">Cancel</button>
+                        <button class="btn btn-outline btn-sm view-details">Details</button>
+                    </div>
+                `
+                list.prepend(item)
+
+                // Update stats
+                updateStats()
+
+                // Reset form
+                deliveryForm.reset()
+                if (pickupMarker) { map.removeLayer(pickupMarker); pickupMarker = null }
+                if (dropoffMarker) { map.removeLayer(dropoffMarker); dropoffMarker = null }
+                if (routeLine) { map.removeLayer(routeLine); routeLine = null }
+                pickupCoords = null
+                dropoffCoords = null
+                document.getElementById('feeDistance').textContent = '0 km'
+                document.getElementById('feeSize').textContent = 'Small'
+                document.getElementById('feeTotal').textContent = '₦500'
+                document.getElementById('estimatedFee').textContent = '₦0'
+
+                showNotification('✅ Delivery task #' + result.task_id.slice(0, 8) + ' created!', 'success')
+                submitBtn.innerHTML = originalText
+                submitBtn.disabled = false
+
+            } catch (error) {
+                showNotification('❌ Error: ' + error.message, 'error')
+                submitBtn.innerHTML = originalText
+                submitBtn.disabled = false
+            }
+        })
+
+        // ================================================================
+        // STATS
+        // ================================================================
+
+        async function updateStats() {
+            const { data: all } = await supabase.from('delivery_tasks').select('status')
+            if (!all) return
+
+            const total = all.length
+            const pending = all.filter(d => d.status === 'pending').length
+            const inProgress = all.filter(d => d.status === 'assigned' || d.status === 'picked_up').length
+            const completed = all.filter(d => d.status === 'delivered').length
+
+            document.getElementById('totalDeliveries').textContent = total
+            document.getElementById('pendingDeliveries').textContent = pending
+            document.getElementById('inProgressDeliveries').textContent = inProgress
+            document.getElementById('completedDeliveries').textContent = completed
+        }
+
+        // ================================================================
+        // FILTERS
+        // ================================================================
+
+        document.querySelectorAll('.delivery-filters .filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.delivery-filters .filter-btn').forEach(b => b.classList.remove('active'))
+                this.classList.add('active')
+
+                const filter = this.dataset.filter
+                document.querySelectorAll('.delivery-item').forEach(item => {
+                    item.classList.toggle('hidden', filter !== 'all' && item.dataset.status !== filter)
+                })
+            })
+        })
+
+        // ================================================================
+        // INITIAL LOAD
+        // ================================================================
+
+        await updateStats()
     </script>
-    <!-- Global JavaScript -->
-    <script src="../../assets/js/main.js"></script>
-    <!-- Page Specific JavaScript -->
-    <script src="delivery.js"></script>
+
+    <style>
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .delivery-item.hidden { display: none; }
+        .empty-state { text-align: center; padding: 40px 24px; }
+        .empty-state i { font-size: 48px; color: #D3C5F6; display: block; margin-bottom: 12px; }
+        .empty-state h3 { font-size: 18px; color: #3B2A60; margin-bottom: 4px; }
+        .empty-state p { color: #6C757D; font-size: 14px; }
+    </style>
+
 </body>
 </html>
