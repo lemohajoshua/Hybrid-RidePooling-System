@@ -3,11 +3,127 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Driver - RidePool+</title>
+    <title>Passenger - RidePool+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <link rel="stylesheet" href="driver.css" />
+    <link rel="stylesheet" href="passenger.css" />
+    <style>
+        .driver-list-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 12px 0;
+        }
+        .driver-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #F8F9FA;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid #E9ECEF;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .driver-item:hover {
+            border-color: #D3C5F6;
+            background: #F0EDF5;
+        }
+        .driver-item.selected {
+            border-color: #3B2A60;
+            background: #D3C5F6;
+        }
+        .driver-item .driver-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .driver-item .driver-name {
+            font-weight: 600;
+            color: #3B2A60;
+        }
+        .driver-item .driver-status {
+            font-size: 12px;
+            color: #6C757D;
+        }
+        .driver-item .driver-seats {
+            font-size: 12px;
+            background: #D3C5F6;
+            padding: 2px 10px;
+            border-radius: 12px;
+            color: #3B2A60;
+            font-weight: 500;
+        }
+        .driver-item .driver-seats.full {
+            background: #C92A2A20;
+            color: #C92A2A;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .status-dot.online { background: #2B8A3E; }
+        .status-dot.busy { background: #E85D04; }
+        .status-dot.offline { background: #6C757D; }
+
+        .offer-status-box {
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .offer-status-box.pending {
+            background: #D3C5F620;
+            border: 1px solid #D3C5F6;
+        }
+        .offer-status-box.accepted {
+            background: #2B8A3E20;
+            border: 1px solid #2B8A3E;
+        }
+        .offer-status-box.rejected {
+            background: #C92A2A20;
+            border: 1px solid #C92A2A;
+        }
+        .offer-status-box.expired {
+            background: #E85D0420;
+            border: 1px solid #E85D04;
+        }
+        .offer-status-box .status-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .offer-status-box .status-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .offer-status-box .status-subtext {
+            font-size: 13px;
+            color: #6C757D;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #D3C5F6;
+            border-top-color: #3B2A60;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #selectDriverBtn {
+            margin-top: 12px;
+        }
+    </style>
 </head>
 <body>
 
@@ -20,8 +136,8 @@
             <ul class="nav-links">
                 <li><a href="../landing/index.html">Home</a></li>
                 <li><a href="../dashboard/index.html">Dashboard</a></li>
-                <li><a href="../passenger/index.html">Passenger</a></li>
-                <li><a href="../driver/index.html" class="active">Driver</a></li>
+                <li><a href="../passenger/index.html" class="active">Passenger</a></li>
+                <li><a href="../driver/index.html">Driver</a></li>
                 <li><a href="../delivery/index.html">Send Delivery</a></li>
                 <li><a href="../admin/index.html">Admin</a></li>
                 <li><a href="../auth/login.html" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Sign In</a></li>
@@ -34,57 +150,184 @@
 
     <div class="page-header">
         <div class="page-header-content">
-            <div class="header-left">
-                <div class="driver-avatar"><span>🚗</span></div>
-                <div class="driver-info">
-                    <h1 id="driverName">Loading...</h1>
-                    <p><i class="fas fa-id-card"></i> Driver ID: <span id="driverId">Loading...</span></p>
-                </div>
-            </div>
-            <div class="header-right">
-                <div class="status-badge online" id="statusBadge">
-                    <span class="status-dot"></span>
-                    <span id="statusText">Online</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="statusToggle" checked />
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+            <h1><i class="fas fa-user"></i> Request a Ride</h1>
+            <p>Find ride-pooling options and save up to 30% on your journey</p>
         </div>
     </div>
 
-    <div class="driver-container">
+    <div class="passenger-container">
 
-        <div class="assignment-card card">
+        <!-- Ride Request Form -->
+        <div class="ride-request-card card">
             <div class="card-header">
-                <h2><i class="fas fa-clipboard-list"></i> Current Assignment</h2>
-                <span class="badge badge-primary" id="assignmentType">Ride-Pooling</span>
+                <h2><i class="fas fa-route"></i> Where are you going?</h2>
             </div>
 
-            <div class="assignment-content" id="noAssignment">
-                <div style="text-align: center; padding: 40px 20px;">
-                    <i class="fas fa-car" style="font-size: 48px; color: #D3C5F6; margin-bottom: 16px; display: block;"></i>
-                    <h3 style="color: #3B2A60; margin-bottom: 8px;">No Current Assignment</h3>
-                    <p style="color: #6C757D;">You are currently idle. Wait for a ride or delivery request.</p>
-                    <div style="margin-top: 16px;">
-                        <span class="badge badge-success" id="statusBadgeDisplay">Online</span>
-                        <span class="badge badge-primary">Available</span>
+            <form id="rideForm">
+                <div class="form-step">
+                    <div class="form-group">
+                        <label for="pickup"><i class="fas fa-map-pin"></i> Pickup Location</label>
+                        <input type="text" id="pickup" placeholder="Enter pickup address" value="FUTO Gate, Owerri" required />
                     </div>
+                    <div class="form-group">
+                        <label for="destination"><i class="fas fa-flag-checkered"></i> Destination</label>
+                        <input type="text" id="destination" placeholder="Enter destination address" value="World Bank Housing Estate" required />
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm" id="useCurrentLocation">
+                        <i class="fas fa-location-dot"></i> Use Current Location
+                    </button>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <div class="form-step">
+                    <h3><i class="fas fa-clock"></i> When do you need to go?</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" />
+                        </div>
+                        <div class="form-group">
+                            <label for="time">Time</label>
+                            <input type="time" id="time" value="09:30" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <div class="form-step">
+                    <h3><i class="fas fa-car"></i> Ride Options</h3>
+                    <div class="ride-toggle-group">
+                        <button type="button" class="ride-toggle" id="soloToggle">
+                            <i class="fas fa-user"></i> Solo Ride
+                        </button>
+                        <button type="button" class="ride-toggle active" id="poolToggle">
+                            <i class="fas fa-users"></i> Pooled Ride
+                            <span class="badge badge-success">Save 30%</span>
+                        </button>
+                    </div>
+                    <p class="ride-info" id="rideInfo">
+                        <i class="fas fa-info-circle"></i> Pooled rides save up to 30% on fare and help reduce traffic congestion.
+                    </p>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-full" id="findRideBtn">
+                    <i class="fas fa-search"></i> Find Available Drivers
+                </button>
+            </form>
+        </div>
+
+        <!-- Driver List -->
+        <div class="driver-list-card card" id="driverListCard" style="display: none;">
+            <div class="card-header">
+                <h2><i class="fas fa-users"></i> Available Drivers</h2>
+                <span class="badge badge-primary" id="driverCount">0 drivers</span>
+            </div>
+            <div id="driverListContainer">
+                <div id="loadingDrivers" style="text-align:center; padding:20px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top:8px; color:#6C757D;">Loading available drivers...</p>
+                </div>
+                <div id="driverList" style="display: none;"></div>
+                <div id="noDrivers" style="display: none; text-align:center; padding:20px; color:#6C757D;">
+                    <i class="fas fa-car" style="font-size:32px; color:#D3C5F6; display:block; margin-bottom:8px;"></i>
+                    <p>No drivers available at the moment. Please try again later.</p>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-full" id="selectDriverBtn" style="display: none;">
+                <i class="fas fa-check"></i> Select This Driver
+            </button>
+            <div style="margin-top:12px; text-align:center; font-size:13px; color:#6C757D;">
+                <i class="fas fa-info-circle"></i> Click on a driver to select them for your ride.
+                <span id="pooledHint" style="display:none;"> Pooled rides show drivers with available seats.</span>
+            </div>
+        </div>
+
+        <!-- Offer Status -->
+        <div id="offerStatusContainer" style="display: none;">
+            <div class="offer-status-box pending" id="offerStatusBox">
+                <span class="status-icon" id="offerStatusIcon">⏳</span>
+                <div class="status-text" id="offerStatusText">Waiting for driver response...</div>
+                <div class="status-subtext" id="offerStatusSubtext">The driver has 2 minutes to respond</div>
+                <div style="margin-top:12px;">
+                    <div class="loading-spinner"></div>
+                </div>
+                <button class="btn btn-outline btn-sm" id="cancelOfferBtn" style="margin-top:12px;">
+                    <i class="fas fa-times"></i> Cancel Request
+                </button>
+            </div>
+        </div>
+
+        <!-- Match Results -->
+        <div class="match-results card" id="matchResults" style="display: none;">
+            <div class="match-header">
+                <div class="match-badge" id="matchBadge">
+                    <i class="fas fa-check-circle"></i> Ride Confirmed!
+                </div>
+                <button class="btn btn-outline btn-sm" id="closeMatch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="match-content">
+                <div class="passenger-comparison">
+                    <div class="passenger-card">
+                        <div class="passenger-avatar"><span>🧑</span></div>
+                        <div class="passenger-details">
+                            <h4>You</h4>
+                            <p><i class="fas fa-map-pin"></i> <span id="matchPickup">FUTO Gate</span></p>
+                            <p><i class="fas fa-flag-checkered"></i> <span id="matchDest">World Bank</span></p>
+                        </div>
+                    </div>
+                    <div class="match-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                        <span id="matchMode">Pooling</span>
+                    </div>
+                    <div class="passenger-card" id="matchedDriverCard">
+                        <div class="passenger-avatar"><span>🚗</span></div>
+                        <div class="passenger-details">
+                            <h4 id="matchedDriverName">Driver <span class="badge badge-primary">Matched</span></h4>
+                            <p><i class="fas fa-car"></i> <span id="matchedDriverVehicle">Sedan</span></p>
+                            <p><i class="fas fa-id-card"></i> ID: <span id="matchedDriverId">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="savings-box">
+                    <div class="savings-amount">
+                        <span class="savings-label">You save</span>
+                        <span class="savings-value" id="savingsAmount">₦540</span>
+                        <span class="savings-percent" id="savingsPercent">(30%)</span>
+                    </div>
+                    <div class="savings-detail">
+                        <span id="soloFare">Solo fare: ₦1,800</span>
+                        <span id="pooledFare">Pooled fare: ₦1,260</span>
+                    </div>
+                </div>
+
+                <div class="match-actions">
+                    <button class="btn btn-success btn-lg" id="confirmRideBtn">
+                        <i class="fas fa-check"></i> Confirm Ride
+                    </button>
+                    <button class="btn btn-outline" id="findAnotherBtn">
+                        <i class="fas fa-undo"></i> Find Another
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="earnings-summary card">
+        <!-- Recent Rides -->
+        <div class="recent-rides card">
             <div class="card-header">
-                <h2><i class="fas fa-wallet"></i> Today's Earnings</h2>
-                <span class="badge badge-success" id="earningsChange">+0%</span>
+                <h2><i class="fas fa-history"></i> Your Recent Rides</h2>
+                <span class="badge badge-primary" id="rideCount">0 trips</span>
             </div>
-            <div class="earnings-grid">
-                <div class="earning-item"><span class="earning-label">Today's Earnings</span><span class="earning-value" id="todayEarnings">₦0</span></div>
-                <div class="earning-item"><span class="earning-label">Trips Completed</span><span class="earning-value" id="tripsCompleted">0</span></div>
-                <div class="earning-item"><span class="earning-label">Available Deliveries</span><span class="earning-value" id="availableDeliveries">0</span></div>
-                <div class="earning-item"><span class="earning-label">Rating</span><span class="earning-value">⭐ 4.8</span></div>
+            <div class="ride-history" id="rideHistory">
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-car"></i>
+                    <p>No recent rides yet. Book your first ride!</p>
+                </div>
             </div>
         </div>
 
@@ -113,63 +356,25 @@
             window.location.href = '../auth/login.html'
         }
 
-        if (user.role !== 'driver') {
-            alert('This page is for drivers only')
+        if (user.role !== 'passenger') {
+            alert('This page is for passengers only')
             window.location.href = '../auth/login.html'
         }
 
-        console.log('✅ Driver page loaded for:', user.name)
+        console.log('✅ Passenger page loaded for:', user.name)
 
-        const driverId = user.id
-
-        // ================================================================
-        // API CALL FUNCTION
-        // ================================================================
-
-        async function apiCall(endpoint, options = {}) {
-            const response = await fetch(`http://localhost:8000/api${endpoint}`, {
-                ...options,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(options.headers || {})
-                }
-            })
-            if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.detail || 'API Error')
-            }
-            return response.json()
-        }
+        const passengerId = user.id
 
         // ================================================================
-        // UPDATE DRIVER STATUS (Called by toggle)
-        // ================================================================
-
-        async function updateDriverStatus(status) {
-            try {
-                const result = await apiCall(`/drivers/${driverId}/status`, {
-                    method: 'PUT',
-                    body: JSON.stringify(status)
-                })
-                console.log('✅ Status updated:', result)
-                return true
-            } catch (error) {
-                console.error('❌ Error updating status:', error)
-                showNotification('❌ Error updating status: ' + error.message, 'error')
-                return false
-            }
-        }
-
-        // ================================================================
-        // SHOW NOTIFICATION
+        // UTILITY FUNCTIONS
         // ================================================================
 
         function showNotification(message, type) {
-            const existing = document.querySelector('.driver-notification');
+            const existing = document.querySelector('.passenger-notification');
             if (existing) existing.remove();
 
             const notification = document.createElement('div');
-            notification.className = 'driver-notification';
+            notification.className = 'passenger-notification';
             notification.style.cssText = `
                 position: fixed; bottom: 24px; right: 24px; padding: 14px 20px;
                 border-radius: 12px; background: ${type === 'success' ? '#2B8A3E' : type === 'error' ? '#C92A2A' : '#3B2A60'};
@@ -189,159 +394,540 @@
             }, 4000);
         }
 
+        function formatCurrency(amount) {
+            return '₦' + Math.round(amount).toLocaleString();
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const response = await fetch(`http://localhost:8000/api${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                }
+            })
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(error.detail || 'API Error')
+            }
+            return response.json()
+        }
+
         // ================================================================
-        // LOAD DRIVER STATS
+        // RIDE TOGGLE
         // ================================================================
 
-        async function loadDriverStats() {
+        const soloToggle = document.getElementById('soloToggle')
+        const poolToggle = document.getElementById('poolToggle')
+        const rideInfo = document.getElementById('rideInfo')
+
+        soloToggle.addEventListener('click', function() {
+            soloToggle.classList.add('active')
+            poolToggle.classList.remove('active')
+            rideInfo.innerHTML = `<i class="fas fa-info-circle"></i> Solo rides are private and direct. No sharing with other passengers.`
+            rideInfo.style.color = '#6C757D'
+            document.getElementById('pooledHint').style.display = 'none'
+        })
+
+        poolToggle.addEventListener('click', function() {
+            poolToggle.classList.add('active')
+            soloToggle.classList.remove('active')
+            rideInfo.innerHTML = `<i class="fas fa-info-circle"></i> Pooled rides save up to 30% on fare and help reduce traffic congestion.`
+            rideInfo.style.color = '#2B8A3E'
+            document.getElementById('pooledHint').style.display = 'inline'
+        })
+
+        // ================================================================
+        // SET DEFAULT DATE
+        // ================================================================
+
+        document.getElementById('date').value = new Date().toISOString().split('T')[0]
+
+        // ================================================================
+        // LOAD AVAILABLE DRIVERS
+        // ================================================================
+
+        let selectedDriverId = null
+        let currentOfferId = null
+        let currentRideRequestId = null
+        let offerCheckInterval = null
+
+        const rideForm = document.getElementById('rideForm')
+        const driverListCard = document.getElementById('driverListCard')
+        const driverList = document.getElementById('driverList')
+        const loadingDrivers = document.getElementById('loadingDrivers')
+        const noDrivers = document.getElementById('noDrivers')
+        const driverCount = document.getElementById('driverCount')
+        const findRideBtn = document.getElementById('findRideBtn')
+        const selectDriverBtn = document.getElementById('selectDriverBtn')
+
+        async function loadAvailableDrivers() {
             try {
-                const data = await apiCall(`/drivers/${driverId}/stats`)
-                console.log('Driver stats:', data)
+                return await apiCall('/passengers/available-drivers')
+            } catch (error) {
+                console.error('Error loading drivers:', error)
+                showNotification('❌ Error loading drivers: ' + error.message, 'error')
+                return []
+            }
+        }
 
-                document.getElementById('driverName').textContent = data.driver.name || 'Driver'
-                document.getElementById('driverId').textContent = driverId.slice(0, 8) || 'Unknown'
+        function renderDrivers(drivers) {
+            driverList.innerHTML = ''
+            const isPooled = poolToggle.classList.contains('active')
 
-                const stats = data.stats
-                document.getElementById('todayEarnings').textContent = '₦' + (stats.total_earnings || 0).toFixed(0)
-                document.getElementById('tripsCompleted').textContent = stats.completed_trips || 0
-                document.getElementById('availableDeliveries').textContent = stats.available_deliveries || 0
+            if (drivers.length === 0) {
+                driverList.style.display = 'none'
+                loadingDrivers.style.display = 'none'
+                noDrivers.style.display = 'block'
+                driverCount.textContent = '0 drivers'
+                selectDriverBtn.style.display = 'none'
+                return
+            }
+
+            let filteredDrivers = drivers
+            if (isPooled) {
+                filteredDrivers = drivers.filter(d => d.available_seats > 0)
+            }
+
+            if (filteredDrivers.length === 0) {
+                driverList.style.display = 'none'
+                loadingDrivers.style.display = 'none'
+                noDrivers.style.display = 'block'
+                noDrivers.innerHTML = `
+                    <i class="fas fa-users" style="font-size:32px; color:#D3C5F6; display:block; margin-bottom:8px;"></i>
+                    <p>${isPooled ? 'No drivers with available seats for pooling.' : 'No drivers available at the moment.'}</p>
+                    ${isPooled ? '<p style="font-size:13px; color:#6C757D;">Try selecting a solo ride instead.</p>' : ''}
+                `
+                driverCount.textContent = '0 drivers'
+                selectDriverBtn.style.display = 'none'
+                return
+            }
+
+            driverList.style.display = 'block'
+            loadingDrivers.style.display = 'none'
+            noDrivers.style.display = 'none'
+            driverCount.textContent = filteredDrivers.length + ' drivers'
+            selectDriverBtn.style.display = 'none'
+
+            filteredDrivers.forEach(driver => {
+                const div = document.createElement('div')
+                div.className = 'driver-item'
+                div.dataset.driverId = driver.driver_id
+
+                const statusDot = driver.status === 'idle' ? 'online' : 
+                                  driver.status === 'en-route' ? 'busy' : 'offline'
+                const statusLabel = driver.status === 'idle' ? 'Available' :
+                                   driver.status === 'en-route' ? 'On Route' : 'Offline'
+
+                const seatsAvailable = driver.available_seats || 0
+                const isFull = seatsAvailable <= 0
+
+                div.innerHTML = `
+                    <div class="driver-info">
+                        <span class="driver-name">🚗 ${driver.name || 'Driver'}</span>
+                        <span class="driver-status">
+                            <span class="status-dot ${statusDot}"></span>
+                            ${statusLabel}
+                            ${isPooled ? ` • ${seatsAvailable} seat${seatsAvailable > 1 ? 's' : ''} available` : ''}
+                        </span>
+                        <span style="font-size:11px; color:#6C757D;">ID: ${driver.driver_id.slice(0, 8)}</span>
+                    </div>
+                    <div>
+                        <span class="driver-seats ${isFull ? 'full' : ''}">
+                            ${isPooled ? (isFull ? 'Full' : `${seatsAvailable} seats`) : 'Available'}
+                        </span>
+                    </div>
+                `
+
+                div.addEventListener('click', () => {
+                    document.querySelectorAll('.driver-item').forEach(el => el.classList.remove('selected'))
+                    div.classList.add('selected')
+                    selectedDriverId = driver.driver_id
+                    selectDriverBtn.style.display = 'block'
+                })
+
+                driverList.appendChild(div)
+            })
+        }
+
+        // ================================================================
+        // SEND RIDE REQUEST
+        // ================================================================
+
+        async function sendRideRequest(driverId) {
+            const pickup = document.getElementById('pickup').value || 'FUTO Gate, Owerri'
+            const destination = document.getElementById('destination').value || 'World Bank Housing Estate'
+            const isPooled = poolToggle.classList.contains('active')
+
+            const originLat = 5.4140
+            const originLng = 7.0160
+            const destLat = 5.4780
+            const destLng = 7.0250
+
+            try {
+                const rideData = {
+                    passenger_id: passengerId,
+                    origin_latitude: originLat,
+                    origin_longitude: originLng,
+                    destination_latitude: destLat,
+                    destination_longitude: destLng,
+                    ride_type: isPooled ? 'pooled' : 'solo',
+                    pickup_time_window_start: new Date().toISOString(),
+                    pickup_time_window_end: new Date(Date.now() + 30 * 60000).toISOString()
+                }
+
+                const rideResult = await apiCall('/passengers/request-ride', {
+                    method: 'POST',
+                    body: JSON.stringify(rideData)
+                })
+                currentRideRequestId = rideResult.request_id
+
+                const selectData = {
+                    passenger_id: passengerId,
+                    driver_id: driverId,
+                    ride_request_id: currentRideRequestId
+                }
+
+                const selectResult = await apiCall('/passengers/select-driver', {
+                    method: 'POST',
+                    body: JSON.stringify(selectData)
+                })
+                currentOfferId = selectResult.offer_id
+
+                document.getElementById('driverListCard').style.display = 'none'
+                document.getElementById('offerStatusContainer').style.display = 'block'
+                document.getElementById('offerStatusBox').className = 'offer-status-box pending'
+                document.getElementById('offerStatusIcon').textContent = '⏳'
+                document.getElementById('offerStatusText').textContent = 'Waiting for driver response...'
+                document.getElementById('offerStatusSubtext').textContent = 'The driver has 2 minutes to respond'
+
+                showNotification('✅ Ride request sent to driver!', 'success')
+
+                startOfferPolling()
 
             } catch (error) {
-                console.error('Error loading driver stats:', error)
+                console.error('Error sending ride request:', error)
+                showNotification('❌ Error: ' + error.message, 'error')
             }
         }
 
         // ================================================================
-        // STATUS TOGGLE - FIXED!
+        // OFFER STATUS POLLING
         // ================================================================
 
-        const statusToggle = document.getElementById('statusToggle')
-        const statusBadge = document.getElementById('statusBadge')
-        const statusText = document.getElementById('statusText')
-        const statusBadgeDisplay = document.getElementById('statusBadgeDisplay')
-
-        statusToggle.addEventListener('change', async function() {
-            const isOnline = this.checked
-            const status = isOnline ? 'idle' : 'offline'
-            const label = isOnline ? 'Online' : 'Offline'
-
-            // Update UI immediately (optimistic)
-            statusBadge.className = `status-badge ${isOnline ? 'online' : 'offline'}`
-            statusText.textContent = label
-            if (statusBadgeDisplay) {
-                statusBadgeDisplay.textContent = label
-                statusBadgeDisplay.className = `badge ${isOnline ? 'badge-success' : 'badge-secondary'}`
+        function startOfferPolling() {
+            if (offerCheckInterval) {
+                clearInterval(offerCheckInterval)
             }
 
-            // Send to backend
-            const success = await updateDriverStatus(status)
-            if (!success) {
-                // Revert if failed
-                this.checked = !isOnline
-                statusBadge.className = `status-badge ${!isOnline ? 'online' : 'offline'}`
-                statusText.textContent = !isOnline ? 'Online' : 'Offline'
-                if (statusBadgeDisplay) {
-                    statusBadgeDisplay.textContent = !isOnline ? 'Online' : 'Offline'
-                    statusBadgeDisplay.className = `badge ${!isOnline ? 'badge-success' : 'badge-secondary'}`
+            let attempts = 0
+            const maxAttempts = 24
+
+            offerCheckInterval = setInterval(async () => {
+                attempts++
+                if (attempts > maxAttempts) {
+                    clearInterval(offerCheckInterval)
+                    document.getElementById('offerStatusIcon').textContent = '⏰'
+                    document.getElementById('offerStatusText').textContent = 'Offer expired'
+                    document.getElementById('offerStatusSubtext').textContent = 'The driver did not respond in time. Please try again.'
+                    document.getElementById('offerStatusBox').className = 'offer-status-box expired'
+                    showNotification('⏰ Offer expired. Please try another driver.', 'error')
+                    return
                 }
+
+                try {
+                    const status = await apiCall(`/passengers/offer-status/${currentOfferId}`)
+                    console.log('Offer status:', status)
+
+                    if (status.status === 'accepted') {
+                        clearInterval(offerCheckInterval)
+                        document.getElementById('offerStatusIcon').textContent = '✅'
+                        document.getElementById('offerStatusText').textContent = 'Ride Accepted!'
+                        document.getElementById('offerStatusSubtext').textContent = 'Your driver is on the way!'
+                        document.getElementById('offerStatusBox').className = 'offer-status-box accepted'
+                        showNotification('🎉 Driver accepted your ride request!', 'success')
+                        showMatchResults(status)
+                        
+                    } else if (status.status === 'rejected') {
+                        clearInterval(offerCheckInterval)
+                        document.getElementById('offerStatusIcon').textContent = '❌'
+                        document.getElementById('offerStatusText').textContent = 'Ride Rejected'
+                        document.getElementById('offerStatusSubtext').textContent = 'The driver declined your request. Please try another driver.'
+                        document.getElementById('offerStatusBox').className = 'offer-status-box rejected'
+                        showNotification('❌ Driver rejected your request. Please try again.', 'error')
+                        
+                    } else if (status.status === 'expired') {
+                        clearInterval(offerCheckInterval)
+                        document.getElementById('offerStatusIcon').textContent = '⏰'
+                        document.getElementById('offerStatusText').textContent = 'Offer Expired'
+                        document.getElementById('offerStatusSubtext').textContent = 'The offer has expired. Please try again.'
+                        document.getElementById('offerStatusBox').className = 'offer-status-box expired'
+                        showNotification('⏰ Offer expired. Please try again.', 'error')
+                    }
+
+                } catch (error) {
+                    console.error('Error checking offer status:', error)
+                }
+            }, 5000)
+        }
+
+        // ================================================================
+        // SHOW MATCH RESULTS
+        // ================================================================
+
+        function showMatchResults(status) {
+            const matchResults = document.getElementById('matchResults')
+            const isPooled = poolToggle.classList.contains('active')
+            const pickup = document.getElementById('pickup').value || 'FUTO Gate'
+            const destination = document.getElementById('destination').value || 'World Bank'
+
+            document.getElementById('matchPickup').textContent = pickup
+            document.getElementById('matchDest').textContent = destination
+            document.getElementById('matchMode').textContent = isPooled ? 'Pooling' : 'Solo'
+
+            apiCall(`/drivers/${status.driver_id}`)
+                .then(driver => {
+                    document.getElementById('matchedDriverName').innerHTML = `${driver.name || 'Driver'} <span class="badge badge-primary">Matched</span>`
+                    document.getElementById('matchedDriverVehicle').textContent = driver.vehicle_type || 'Sedan'
+                    document.getElementById('matchedDriverId').textContent = driver.driver_id.slice(0, 8)
+                })
+                .catch(() => {
+                    document.getElementById('matchedDriverName').innerHTML = `Driver <span class="badge badge-primary">Matched</span>`
+                })
+
+            const soloFare = 1800
+            const pooledFare = 1260
+            if (isPooled) {
+                document.getElementById('savingsAmount').textContent = `₦${soloFare - pooledFare}`
+                document.getElementById('savingsPercent').textContent = '(30%)'
+                document.getElementById('soloFare').textContent = `Solo fare: ₦${soloFare}`
+                document.getElementById('pooledFare').textContent = `Pooled fare: ₦${pooledFare}`
             } else {
-                showNotification(`✅ Status updated to ${label}`, 'success')
+                document.getElementById('savingsAmount').textContent = '₦0'
+                document.getElementById('savingsPercent').textContent = '(0%)'
+                document.getElementById('soloFare').textContent = `Solo fare: ₦${soloFare}`
+                document.getElementById('pooledFare').textContent = 'No savings'
+            }
+
+            matchResults.style.display = 'block'
+            document.getElementById('offerStatusContainer').style.display = 'none'
+            matchResults.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+
+        // ================================================================
+        // BUTTON EVENTS
+        // ================================================================
+
+        selectDriverBtn.addEventListener('click', async () => {
+            if (!selectedDriverId) {
+                showNotification('Please select a driver first.', 'error')
+                return
+            }
+            await sendRideRequest(selectedDriverId)
+        })
+
+        document.getElementById('confirmRideBtn').addEventListener('click', function() {
+            const isPooled = poolToggle.classList.contains('active')
+            const pickup = document.getElementById('pickup').value || 'FUTO Gate'
+            const destination = document.getElementById('destination').value || 'World Bank'
+
+            const historyContainer = document.getElementById('rideHistory')
+            const emptyState = document.getElementById('emptyState')
+            if (emptyState) emptyState.remove()
+
+            const now = new Date()
+            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+
+            const item = document.createElement('div')
+            item.className = 'history-item'
+            item.innerHTML = `
+                <div class="history-icon"><i class="fas ${isPooled ? 'fa-users' : 'fa-car'}"></i></div>
+                <div class="history-details">
+                    <div class="history-route">${pickup} → ${destination}</div>
+                    <div class="history-meta">
+                        <span><i class="far fa-calendar"></i> ${dateStr}</span>
+                        <span><i class="far fa-clock"></i> ${timeStr}</span>
+                        <span class="badge badge-success">Confirmed</span>
+                        ${isPooled ? '<span class="badge badge-primary">Pooled</span>' : ''}
+                    </div>
+                </div>
+                <div class="history-cost">${isPooled ? '₦1,260' : '₦1,800'}</div>
+            `
+            historyContainer.prepend(item)
+
+            const countEl = document.getElementById('rideCount')
+            const currentCount = parseInt(countEl.textContent) || 0
+            countEl.textContent = (currentCount + 1) + ' trips'
+
+            document.getElementById('matchResults').style.display = 'none'
+            showNotification('✅ Ride confirmed! Your driver is on the way.', 'success')
+        })
+
+        document.getElementById('closeMatch').addEventListener('click', function() {
+            document.getElementById('matchResults').style.display = 'none'
+        })
+
+        document.getElementById('findAnotherBtn').addEventListener('click', function() {
+            document.getElementById('matchResults').style.display = 'none'
+            document.getElementById('driverListCard').style.display = 'block'
+            loadAndRenderDrivers()
+        })
+
+        document.getElementById('cancelOfferBtn').addEventListener('click', function() {
+            if (offerCheckInterval) {
+                clearInterval(offerCheckInterval)
+            }
+            document.getElementById('offerStatusContainer').style.display = 'none'
+            document.getElementById('driverListCard').style.display = 'block'
+            showNotification('🔄 Request cancelled. You can try another driver.', 'info')
+            loadAndRenderDrivers()
+        })
+
+        // ================================================================
+        // LOAD DRIVERS ON FIND
+        // ================================================================
+
+        async function loadAndRenderDrivers() {
+            driverListCard.style.display = 'block'
+            driverList.style.display = 'none'
+            loadingDrivers.style.display = 'block'
+            noDrivers.style.display = 'none'
+            driverCount.textContent = 'Loading...'
+            selectDriverBtn.style.display = 'none'
+
+            const drivers = await loadAvailableDrivers()
+            renderDrivers(drivers)
+        }
+
+        rideForm.addEventListener('submit', async function(e) {
+            e.preventDefault()
+
+            const pickup = document.getElementById('pickup').value
+            const destination = document.getElementById('destination').value
+
+            if (!pickup || !destination) {
+                showNotification('Please enter pickup and destination.', 'error')
+                return
+            }
+
+            selectedDriverId = null
+            currentOfferId = null
+            currentRideRequestId = null
+
+            findRideBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...'
+            findRideBtn.disabled = true
+
+            await loadAndRenderDrivers()
+
+            findRideBtn.innerHTML = '<i class="fas fa-search"></i> Find Available Drivers'
+            findRideBtn.disabled = false
+
+            const isPooled = poolToggle.classList.contains('active')
+            document.getElementById('pooledHint').style.display = isPooled ? 'inline' : 'none'
+        })
+
+        // ================================================================
+        // USE CURRENT LOCATION
+        // ================================================================
+
+        document.getElementById('useCurrentLocation').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude.toFixed(6)
+                        const lng = pos.coords.longitude.toFixed(6)
+                        document.getElementById('pickup').value = `📍 ${lat}, ${lng}`
+                        showNotification('📍 Location updated!', 'info')
+                    },
+                    () => {
+                        showNotification('❌ Unable to get location. Please enter manually.', 'error')
+                    }
+                )
+            } else {
+                showNotification('❌ Geolocation not supported by your browser.', 'error')
             }
         })
 
         // ================================================================
-        // START WITH ONLINE STATUS
+        // KEYBOARD SHORTCUTS
         // ================================================================
 
-        // Set initial status to 'idle' (online)
-        async function initializeDriverStatus() {
-            try {
-                // Get current driver status
-                const data = await apiCall(`/drivers/${driverId}`)
-                const currentStatus = data.status || 'idle'
+        console.log('⌨️ Keyboard Shortcuts: [Enter] Find drivers, [Esc] Cancel')
 
-                // If status is 'offline', toggle off
-                if (currentStatus === 'offline') {
-                    statusToggle.checked = false
-                    statusBadge.className = 'status-badge offline'
-                    statusText.textContent = 'Offline'
-                    if (statusBadgeDisplay) {
-                        statusBadgeDisplay.textContent = 'Offline'
-                        statusBadgeDisplay.className = 'badge badge-secondary'
-                    }
-                } else {
-                    statusToggle.checked = true
-                    statusBadge.className = 'status-badge online'
-                    statusText.textContent = 'Online'
-                    if (statusBadgeDisplay) {
-                        statusBadgeDisplay.textContent = 'Online'
-                        statusBadgeDisplay.className = 'badge badge-success'
-                    }
-                    // If status is not idle, set to idle
-                    if (currentStatus !== 'idle') {
-                        await updateDriverStatus('idle')
-                    }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'INPUT') {
+                rideForm.dispatchEvent(new Event('submit'))
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('offerStatusContainer').style.display !== 'none') {
+                    document.getElementById('cancelOfferBtn').click()
                 }
-            } catch (error) {
-                console.error('Error initializing driver status:', error)
+            }
+        })
+
+        // ================================================================
+        // LOAD RECENT RIDES
+        // ================================================================
+
+        function loadRecentRides() {
+            const rides = JSON.parse(localStorage.getItem('recentRides') || '[]')
+            const historyContainer = document.getElementById('rideHistory')
+            const emptyState = document.getElementById('emptyState')
+            
+            if (rides.length > 0 && emptyState) {
+                emptyState.remove()
+                rides.forEach(ride => {
+                    const item = document.createElement('div')
+                    item.className = 'history-item'
+                    item.innerHTML = `
+                        <div class="history-icon"><i class="fas ${ride.pooled ? 'fa-users' : 'fa-car'}"></i></div>
+                        <div class="history-details">
+                            <div class="history-route">${ride.pickup} → ${ride.destination}</div>
+                            <div class="history-meta">
+                                <span><i class="far fa-calendar"></i> ${ride.date}</span>
+                                <span><i class="far fa-clock"></i> ${ride.time}</span>
+                                <span class="badge badge-success">Completed</span>
+                                ${ride.pooled ? '<span class="badge badge-primary">Pooled</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="history-cost">${ride.cost}</div>
+                    `
+                    historyContainer.prepend(item)
+                })
+                document.getElementById('rideCount').textContent = rides.length + ' trips'
             }
         }
 
-        // ================================================================
-        // INITIALIZE
-        // ================================================================
+        function saveRide(pickup, destination, pooled, cost) {
+            const rides = JSON.parse(localStorage.getItem('recentRides') || '[]')
+            const now = new Date()
+            rides.unshift({
+                pickup,
+                destination,
+                pooled,
+                cost,
+                date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+            })
+            if (rides.length > 20) rides.pop()
+            localStorage.setItem('recentRides', JSON.stringify(rides))
+        }
 
-        await loadDriverStats()
-        await initializeDriverStatus()
+        // Override confirm to save ride
+        document.getElementById('confirmRideBtn').addEventListener('click', function() {
+            const isPooled = poolToggle.classList.contains('active')
+            const pickup = document.getElementById('pickup').value || 'FUTO Gate'
+            const destination = document.getElementById('destination').value || 'World Bank'
+            const cost = isPooled ? '₦1,260' : '₦1,800'
+            saveRide(pickup, destination, isPooled, cost)
+        })
 
-        // Refresh stats every 30 seconds
-        setInterval(loadDriverStats, 30000)
+        loadRecentRides()
 
-        console.log('✅ Driver page fully loaded')
-        console.log('🔄 Auto-refresh every 30 seconds')
-        console.log('📌 Make sure you are ONLINE to appear in passenger search')
+        console.log('✅ Passenger page fully loaded')
+        console.log('🚀 Ride request system ready!')
     </script>
-
-    <style>
-        @keyframes slideUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        .badge-secondary {
-            background: #6C757D;
-            color: #FFFFFF;
-        }
-        .badge-success {
-            background: #2B8A3E;
-            color: #FFFFFF;
-        }
-        .badge-warning {
-            background: #E85D04;
-            color: #FFFFFF;
-        }
-        .badge-primary {
-            background: #3B2A60;
-            color: #FFFFFF;
-        }
-        .status-badge .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        .status-badge.online .status-dot {
-            background: #2B8A3E;
-            animation: pulse-dot 1.5s infinite;
-        }
-        .status-badge.offline .status-dot {
-            background: #6C757D;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-    </style>
 
 </body>
 </html>
