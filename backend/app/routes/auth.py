@@ -1,6 +1,6 @@
 # routes/auth.py
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import uuid
 
 from ..database import supabase
@@ -11,14 +11,14 @@ router = APIRouter()
 class RegisterPassengerRequest(BaseModel):
     name: str
     phone: str
-    email: EmailStr
+    email: str
     password: str
 
 
 class RegisterDriverRequest(BaseModel):
     name: str
     phone: str
-    email: EmailStr
+    email: str
     vehicle_type: str = "Sedan"
     vehicle_capacity: int = 4
     password: str
@@ -54,10 +54,15 @@ async def register_passenger(req: RegisterPassengerRequest):
 @router.post("/register/driver")
 async def register_driver(req: RegisterDriverRequest):
     """Register a new driver."""
-    # Check if phone exists
-    existing = supabase.table('drivers').select('*').eq('phone_number', req.phone).execute()
-    if existing.data:
+    # Check if phone already exists
+    existing_phone = supabase.table('drivers').select('*').eq('phone_number', req.phone).execute()
+    if existing_phone.data:
         raise HTTPException(status_code=400, detail="Phone number already registered")
+    
+    # Check if email already exists for drivers
+    existing_email = supabase.table('drivers').select('*').eq('email', req.email).execute()
+    if existing_email.data:
+        raise HTTPException(status_code=400, detail="Email already registered as a driver")
     
     driver_id = str(uuid.uuid4())
     
@@ -65,6 +70,7 @@ async def register_driver(req: RegisterDriverRequest):
         'driver_id': driver_id,
         'name': req.name,
         'phone_number': req.phone,
+        'email': req.email,  # ← Store email for drivers!
         'vehicle_type': req.vehicle_type,
         'vehicle_capacity': req.vehicle_capacity,
         'status': 'idle'
@@ -78,7 +84,7 @@ async def register_driver(req: RegisterDriverRequest):
 @router.post("/login")
 async def login(req: LoginRequest):
     """Login user."""
-    # Check passenger
+    # Check passenger by email
     passenger = supabase.table('passengers').select('*').eq('email', req.email).execute()
     if passenger.data:
         p = passenger.data[0]
@@ -91,8 +97,8 @@ async def login(req: LoginRequest):
             }
         }
     
-    # Check driver
-    driver = supabase.table('drivers').select('*').eq('phone_number', req.email).execute()
+    # Check driver by email (NOW FIXED!)
+    driver = supabase.table('drivers').select('*').eq('email', req.email).execute()
     if driver.data:
         d = driver.data[0]
         return {
@@ -100,7 +106,7 @@ async def login(req: LoginRequest):
                 "id": d['driver_id'],
                 "name": d['name'],
                 "role": "driver",
-                "phone": d['phone_number']
+                "email": d.get('email', '')
             }
         }
     

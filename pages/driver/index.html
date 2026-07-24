@@ -38,8 +38,8 @@
             <div class="header-left">
                 <div class="driver-avatar"><span>🚗</span></div>
                 <div class="driver-info">
-                    <h1 id="driverName">Chidi Okonkwo</h1>
-                    <p><i class="fas fa-id-card"></i> Driver ID: <span id="driverId">#D014</span></p>
+                    <h1 id="driverName">Loading...</h1>
+                    <p><i class="fas fa-id-card"></i> Driver ID: <span id="driverId">Loading...</span></p>
                 </div>
             </div>
             <div class="header-right">
@@ -55,11 +55,12 @@
         </div>
     </div>
 
-    <div class="notification-banner" id="notificationBanner">
+    <!-- Notification Banner -->
+    <div class="notification-banner" id="notificationBanner" style="display: none;">
         <div class="notification-content">
             <i class="fas fa-bell"></i>
             <span><strong>New delivery task</strong> available on your route!</span>
-            <span class="notification-location"><i class="fas fa-map-pin"></i> Obinze Market → World Bank</span>
+            <span class="notification-location"><i class="fas fa-map-pin"></i> <span id="notifPickup">-</span> → <span id="notifDropoff">-</span></span>
         </div>
         <div class="notification-actions">
             <button class="btn btn-success btn-sm" id="acceptDelivery">Accept</button>
@@ -72,13 +73,15 @@
 
     <div class="driver-container">
 
-        <div class="assignment-card card">
+        <!-- ===== CURRENT ASSIGNMENT CARD ===== -->
+        <div class="assignment-card card" id="assignmentCard">
             <div class="card-header">
                 <h2><i class="fas fa-clipboard-list"></i> Current Assignment</h2>
                 <span class="badge badge-primary" id="assignmentType">Ride-Pooling</span>
             </div>
 
-            <div class="assignment-content" id="ridePoolingAssignment">
+            <!-- Ride Pooling Assignment -->
+            <div class="assignment-content" id="ridePoolingAssignment" style="display: none;">
                 <div class="passenger-ride-group">
                     <div class="passenger-ride">
                         <div class="passenger-ride-header">
@@ -86,9 +89,9 @@
                             <span class="badge badge-success" id="pax1Status">Picked Up</span>
                         </div>
                         <div class="route-details">
-                            <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span>FUTO Gate</span></div>
+                            <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span id="pax1Pickup">-</span></div>
                             <div class="route-arrow"><i class="fas fa-arrow-down"></i></div>
-                            <div class="route-stop dropoff"><i class="fas fa-flag-checkered"></i> <span>World Bank</span></div>
+                            <div class="route-stop dropoff"><i class="fas fa-flag-checkered"></i> <span id="pax1Dropoff">-</span></div>
                         </div>
                     </div>
                     <div class="passenger-ride">
@@ -97,19 +100,19 @@
                             <span class="badge badge-warning" id="pax2Status">Waiting</span>
                         </div>
                         <div class="route-details">
-                            <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span>Concorde Hotel</span></div>
+                            <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span id="pax2Pickup">-</span></div>
                             <div class="route-arrow"><i class="fas fa-arrow-down"></i></div>
-                            <div class="route-stop dropoff"><i class="fas fa-flag-checkered"></i> <span>World Bank</span></div>
+                            <div class="route-stop dropoff"><i class="fas fa-flag-checkered"></i> <span id="pax2Dropoff">-</span></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="assignment-summary">
-                    <div class="summary-item"><span class="summary-label">Total Distance</span><span class="summary-value">12.4 km</span></div>
+                    <div class="summary-item"><span class="summary-label">Total Distance</span><span class="summary-value" id="tripDistance">-</span></div>
                     <div class="summary-divider"></div>
-                    <div class="summary-item"><span class="summary-label">Estimated Earnings</span><span class="summary-value">₦2,400</span></div>
+                    <div class="summary-item"><span class="summary-label">Estimated Earnings</span><span class="summary-value" id="tripEarnings">-</span></div>
                     <div class="summary-divider"></div>
-                    <div class="summary-item"><span class="summary-label">Pickup Window</span><span class="summary-value">5 min</span></div>
+                    <div class="summary-item"><span class="summary-label">Status</span><span class="summary-value" id="tripStatus">-</span></div>
                 </div>
 
                 <div class="assignment-actions">
@@ -119,25 +122,26 @@
                 </div>
             </div>
 
+            <!-- Delivery Assignment -->
             <div class="assignment-content" id="deliveryAssignment" style="display: none;">
                 <div class="delivery-details">
                     <div class="delivery-package">
                         <div class="package-icon"><i class="fas fa-box"></i></div>
                         <div class="package-info">
-                            <h4>Small Parcel</h4>
-                            <p>Weight: 2.5 kg</p>
-                            <p><span class="badge badge-primary" id="deliveryStatus">Express</span></p>
+                            <h4 id="deliveryTitle">Small Parcel</h4>
+                            <p>Weight: <span id="deliveryWeight">2.5</span> kg</p>
+                            <p><span class="badge badge-primary" id="deliveryStatusBadge">Express</span></p>
                         </div>
                     </div>
                     <div class="route-details">
-                        <div class="route-stop pickup"><i class="fas fa-store"></i> <div><span class="route-label">Pickup</span><span>Obinze Market</span></div></div>
+                        <div class="route-stop pickup"><i class="fas fa-store"></i> <div><span class="route-label">Pickup</span><span id="deliveryPickup">-</span></div></div>
                         <div class="route-arrow"><i class="fas fa-arrow-right"></i></div>
-                        <div class="route-stop dropoff"><i class="fas fa-home"></i> <div><span class="route-label">Dropoff</span><span>World Bank Estate</span></div></div>
+                        <div class="route-stop dropoff"><i class="fas fa-home"></i> <div><span class="route-label">Dropoff</span><span id="deliveryDropoff">-</span></div></div>
                     </div>
                     <div class="assignment-summary">
-                        <div class="summary-item"><span class="summary-label">Delivery Fee</span><span class="summary-value">₦1,200</span></div>
+                        <div class="summary-item"><span class="summary-label">Delivery Fee</span><span class="summary-value" id="deliveryFee">₦1,200</span></div>
                         <div class="summary-divider"></div>
-                        <div class="summary-item"><span class="summary-label">Time Window</span><span class="summary-value">45 min</span></div>
+                        <div class="summary-item"><span class="summary-label">Time Window</span><span class="summary-value" id="deliveryWindow">45 min</span></div>
                     </div>
                     <div class="assignment-actions">
                         <button class="btn btn-success" id="startDeliveryBtn"><i class="fas fa-play"></i> Start Delivery</button>
@@ -145,31 +149,45 @@
                     </div>
                 </div>
             </div>
+
+            <!-- No Assignment (Shown when driver is idle) -->
+            <div class="assignment-content" id="noAssignment">
+                <div style="text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-car" style="font-size: 48px; color: #D3C5F6; margin-bottom: 16px; display: block;"></i>
+                    <h3 style="color: #3B2A60; margin-bottom: 8px;">No Current Assignment</h3>
+                    <p style="color: #6C757D;">You are currently idle. Wait for a ride or delivery request.</p>
+                    <div style="margin-top: 16px;">
+                        <span class="badge badge-success">Online</span>
+                        <span class="badge badge-primary">Available</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- ===== ROUTE MAP CARD ===== -->
         <div class="route-map-card card">
             <div class="card-header">
                 <h2><i class="fas fa-map"></i> Optimised Route</h2>
-                <span class="badge badge-primary">4 Stops</span>
+                <span class="badge badge-primary" id="routeStopCount">0 Stops</span>
             </div>
             <div id="routeMap"></div>
-            <div class="route-stops">
-                <div class="route-stop-item active"><span class="stop-number">1</span><span class="stop-label">Pickup A</span><span class="stop-location">FUTO Gate</span></div>
-                <div class="route-stop-item"><span class="stop-number">2</span><span class="stop-label">Pickup B</span><span class="stop-location">Concorde Hotel</span></div>
-                <div class="route-stop-item"><span class="stop-number">3</span><span class="stop-label">Dropoff A</span><span class="stop-location">World Bank</span></div>
-                <div class="route-stop-item"><span class="stop-number">4</span><span class="stop-label">Dropoff B</span><span class="stop-location">World Bank</span></div>
+            <div class="route-stops" id="routeStops">
+                <div style="text-align:center; padding:12px; color:#6C757D; font-size:14px;">
+                    No active route
+                </div>
             </div>
         </div>
 
+        <!-- ===== EARNINGS SUMMARY ===== -->
         <div class="earnings-summary card">
             <div class="card-header">
                 <h2><i class="fas fa-wallet"></i> Today's Earnings</h2>
-                <span class="badge badge-success" id="earningsChange">+12%</span>
+                <span class="badge badge-success" id="earningsChange">+0%</span>
             </div>
             <div class="earnings-grid">
-                <div class="earning-item"><span class="earning-label">Today's Earnings</span><span class="earning-value" id="todayEarnings">₦12,500</span></div>
-                <div class="earning-item"><span class="earning-label">Trips Completed</span><span class="earning-value" id="tripsCompleted">8</span></div>
-                <div class="earning-item"><span class="earning-label">Available Deliveries</span><span class="earning-value" id="availableDeliveries">3</span></div>
+                <div class="earning-item"><span class="earning-label">Today's Earnings</span><span class="earning-value" id="todayEarnings">₦0</span></div>
+                <div class="earning-item"><span class="earning-label">Trips Completed</span><span class="earning-value" id="tripsCompleted">0</span></div>
+                <div class="earning-item"><span class="earning-label">Available Deliveries</span><span class="earning-value" id="availableDeliveries">0</span></div>
                 <div class="earning-item"><span class="earning-label">Rating</span><span class="earning-value">⭐ 4.8</span></div>
             </div>
         </div>
@@ -189,31 +207,34 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
-        import { supabase, getCurrentUser, updateDriverStatus, updateDriverLocation } from '../../assets/js/supabase-client.js'
+        import { updateDriverStatus } from '../../assets/js/api.js'
 
-        // Get current user
-        const user = await getCurrentUser()
+        // ================================================================
+        //  1.  CHECK USER AUTH
+        // ================================================================
+
+        const user = JSON.parse(localStorage.getItem('user'))
+
         if (!user) {
+            alert('Please login first')
             window.location.href = '../auth/login.html'
         }
 
-        // Get driver profile
-        const { data: driver, error: driverError } = await supabase
-            .from('drivers')
-            .select('*')
-            .eq('driver_id', user.id)
-            .single()
-
-        if (driverError || !driver) {
-            alert('Driver profile not found. Please register as a driver first.')
-            window.location.href = '../auth/driver-register.html'
+        if (user.role !== 'driver') {
+            alert('This page is for drivers only')
+            window.location.href = '../auth/login.html'
         }
 
-        // Set driver info
-        document.getElementById('driverName').textContent = driver.name || 'Driver'
-        document.getElementById('driverId').textContent = driver.driver_id?.slice(0, 8) || 'Unknown'
+        console.log('✅ Driver page loaded for:', user.name)
 
-        // Notification function
+        const driverId = user.id
+        let map = null
+        let routeLine = null
+
+        // ================================================================
+        //  2.  NOTIFICATION FUNCTION
+        // ================================================================
+
         function showNotification(message, type) {
             const existing = document.querySelector('.driver-notification');
             if (existing) existing.remove();
@@ -239,19 +260,258 @@
             }, 4000);
         }
 
-        // Status toggle
+        // ================================================================
+        //  3.  LOAD DRIVER DATA
+        // ================================================================
+
+        async function loadDriverStats() {
+            try {
+                const response = await fetch(`http://localhost:8000/api/drivers/${driverId}/stats`)
+                if (!response.ok) throw new Error('Failed to fetch driver stats')
+                const data = await response.json()
+                console.log('Driver stats:', data)
+
+                document.getElementById('driverName').textContent = data.driver.name || 'Driver'
+                document.getElementById('driverId').textContent = driverId.slice(0, 8) || 'Unknown'
+
+                const stats = data.stats
+                document.getElementById('todayEarnings').textContent = '₦' + stats.total_earnings.toFixed(0)
+                document.getElementById('tripsCompleted').textContent = stats.completed_trips
+                document.getElementById('availableDeliveries').textContent = stats.available_deliveries
+
+                return data
+            } catch (error) {
+                console.error('Error loading driver stats:', error)
+                showNotification('❌ Error loading driver data: ' + error.message, 'error')
+                return null
+            }
+        }
+
+        // ================================================================
+        //  4.  LOAD CURRENT TRIP (REAL ACTIVITY)
+        // ================================================================
+
+        async function loadCurrentTrip() {
+            try {
+                const response = await fetch(`http://localhost:8000/api/drivers/${driverId}/current-trip`)
+                if (!response.ok) throw new Error('Failed to fetch current trip')
+                const data = await response.json()
+                console.log('Current trip:', data)
+
+                const rideAssignment = document.getElementById('ridePoolingAssignment')
+                const deliveryAssignment = document.getElementById('deliveryAssignment')
+                const noAssignment = document.getElementById('noAssignment')
+                const routeStops = document.getElementById('routeStops')
+                const routeStopCount = document.getElementById('routeStopCount')
+
+                // Hide all by default
+                rideAssignment.style.display = 'none'
+                deliveryAssignment.style.display = 'none'
+                noAssignment.style.display = 'none'
+
+                if (!data.has_active_trip) {
+                    // Show no assignment
+                    noAssignment.style.display = 'block'
+                    routeStops.innerHTML = `
+                        <div style="text-align:center; padding:12px; color:#6C757D; font-size:14px;">
+                            No active route
+                        </div>
+                    `
+                    routeStopCount.textContent = '0 Stops'
+                    if (routeLine && map) {
+                        map.removeLayer(routeLine)
+                        routeLine = null
+                    }
+                    return
+                }
+
+                const trip = data.trip
+                const rides = data.rides || []
+                const tasks = data.tasks || []
+
+                // Check if it's a ride or delivery
+                if (rides.length > 0) {
+                    // Ride Pooling Assignment
+                    rideAssignment.style.display = 'block'
+                    document.getElementById('assignmentType').textContent = 'Ride-Pooling'
+                    document.getElementById('assignmentType').className = 'badge badge-primary'
+
+                    // Passenger 1
+                    const p1 = rides[0]
+                    document.getElementById('pax1Pickup').textContent = `${p1.origin_latitude.toFixed(4)}, ${p1.origin_longitude.toFixed(4)}`
+                    document.getElementById('pax1Dropoff').textContent = `${p1.destination_latitude.toFixed(4)}, ${p1.destination_longitude.toFixed(4)}`
+
+                    // Passenger 2 (if exists)
+                    if (rides.length > 1) {
+                        const p2 = rides[1]
+                        document.getElementById('pax2Pickup').textContent = `${p2.origin_latitude.toFixed(4)}, ${p2.origin_longitude.toFixed(4)}`
+                        document.getElementById('pax2Dropoff').textContent = `${p2.destination_latitude.toFixed(4)}, ${p2.destination_longitude.toFixed(4)}`
+                        document.getElementById('pax2Status').textContent = 'Waiting'
+                        document.getElementById('pax2Status').className = 'badge badge-warning'
+                    } else {
+                        document.getElementById('pax2Pickup').textContent = '—'
+                        document.getElementById('pax2Dropoff').textContent = '—'
+                        document.getElementById('pax2Status').textContent = 'N/A'
+                        document.getElementById('pax2Status').className = 'badge badge-secondary'
+                    }
+
+                    // Trip summary
+                    document.getElementById('tripDistance').textContent = (trip.total_distance || 0).toFixed(1) + ' km'
+                    const earnings = (trip.total_fare || 0) * 0.8
+                    document.getElementById('tripEarnings').textContent = '₦' + earnings.toFixed(0)
+                    document.getElementById('tripStatus').textContent = trip.status || 'planned'
+
+                    // Route stops
+                    let stopsHtml = ''
+                    const allStops = []
+                    rides.forEach((ride, idx) => {
+                        const stopNum = idx * 2 + 1
+                        allStops.push({ 
+                            number: stopNum, 
+                            label: `Pickup ${idx+1}`, 
+                            location: `${ride.origin_latitude.toFixed(4)}, ${ride.origin_longitude.toFixed(4)}`,
+                            lat: ride.origin_latitude,
+                            lng: ride.origin_longitude
+                        })
+                        allStops.push({ 
+                            number: stopNum + 1, 
+                            label: `Dropoff ${idx+1}`, 
+                            location: `${ride.destination_latitude.toFixed(4)}, ${ride.destination_longitude.toFixed(4)}`,
+                            lat: ride.destination_latitude,
+                            lng: ride.destination_longitude
+                        })
+                    })
+                    allStops.forEach((stop, idx) => {
+                        stopsHtml += `
+                            <div class="route-stop-item ${idx === 0 ? 'active' : ''}">
+                                <span class="stop-number">${stop.number}</span>
+                                <span class="stop-label">${stop.label}</span>
+                                <span class="stop-location">${stop.location}</span>
+                            </div>
+                        `
+                    })
+                    routeStops.innerHTML = stopsHtml
+                    routeStopCount.textContent = allStops.length + ' Stops'
+
+                    // Draw route on map
+                    drawRoute(allStops)
+
+                } else if (tasks.length > 0) {
+                    // Delivery Assignment
+                    deliveryAssignment.style.display = 'block'
+                    document.getElementById('assignmentType').textContent = 'Delivery'
+                    document.getElementById('assignmentType').className = 'badge badge-warning'
+
+                    const task = tasks[0]
+                    document.getElementById('deliveryPickup').textContent = `${task.pickup_latitude.toFixed(4)}, ${task.pickup_longitude.toFixed(4)}`
+                    document.getElementById('deliveryDropoff').textContent = `${task.dropoff_latitude.toFixed(4)}, ${task.dropoff_longitude.toFixed(4)}`
+                    document.getElementById('deliveryTitle').textContent = task.package_description || 'Parcel'
+                    document.getElementById('deliveryWeight').textContent = '2.5'
+                    document.getElementById('deliveryFee').textContent = '₦1,200'
+                    document.getElementById('deliveryWindow').textContent = '45 min'
+
+                    // Route stops for delivery
+                    const allStops = [
+                        { number: 1, label: 'Pickup', location: `${task.pickup_latitude.toFixed(4)}, ${task.pickup_longitude.toFixed(4)}`, lat: task.pickup_latitude, lng: task.pickup_longitude },
+                        { number: 2, label: 'Dropoff', location: `${task.dropoff_latitude.toFixed(4)}, ${task.dropoff_longitude.toFixed(4)}`, lat: task.dropoff_latitude, lng: task.dropoff_longitude }
+                    ]
+                    let stopsHtml = ''
+                    allStops.forEach((stop, idx) => {
+                        stopsHtml += `
+                            <div class="route-stop-item ${idx === 0 ? 'active' : ''}">
+                                <span class="stop-number">${stop.number}</span>
+                                <span class="stop-label">${stop.label}</span>
+                                <span class="stop-location">${stop.location}</span>
+                            </div>
+                        `
+                    })
+                    routeStops.innerHTML = stopsHtml
+                    routeStopCount.textContent = allStops.length + ' Stops'
+
+                    drawRoute(allStops)
+                }
+
+            } catch (error) {
+                console.error('Error loading current trip:', error)
+                showNotification('❌ Error loading current trip: ' + error.message, 'error')
+            }
+        }
+
+        // ================================================================
+        //  5.  DRAW ROUTE ON MAP
+        // ================================================================
+
+        function drawRoute(stops) {
+            const routeMapContainer = document.getElementById('routeMap')
+            if (!routeMapContainer || stops.length < 2) return
+
+            if (typeof L === 'undefined') {
+                console.warn('Leaflet not loaded')
+                return
+            }
+
+            // Initialize map if not exists
+            if (!map) {
+                map = L.map('routeMap', { 
+                    center: [5.46, 7.02], 
+                    zoom: 12, 
+                    zoomControl: true,
+                    attributionControl: true
+                })
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map)
+            }
+
+            // Remove existing route line
+            if (routeLine) {
+                map.removeLayer(routeLine)
+                routeLine = null
+            }
+
+            // Add route line
+            const points = stops.map(s => [s.lat, s.lng])
+            routeLine = L.polyline(points, {
+                color: '#7b2fbe',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '8,6'
+            }).addTo(map)
+
+            // Add markers for each stop
+            stops.forEach((stop, idx) => {
+                const color = idx === 0 ? '#2B8A3E' : idx === stops.length - 1 ? '#E85D04' : '#3B2A60'
+                L.marker([stop.lat, stop.lng], {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<div style="background:${color};color:#FFF;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${stop.number}</div>`,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    })
+                }).bindTooltip(stop.label + ': ' + stop.location, { permanent: false }).addTo(map)
+            })
+
+            // Fit bounds to show all points
+            const bounds = L.latLngBounds(points)
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
+        }
+
+        // ================================================================
+        //  6.  STATUS TOGGLE
+        // ================================================================
+
         const statusToggle = document.getElementById('statusToggle')
         const statusBadge = document.getElementById('statusBadge')
         const statusText = document.getElementById('statusText')
 
         statusToggle.addEventListener('change', async function() {
-            const newStatus = this.checked ? 'idle' : 'offline'
             const label = this.checked ? 'Online' : 'Offline'
             statusBadge.className = `status-badge ${this.checked ? 'online' : 'offline'}`
             statusText.textContent = label
 
             try {
-                await updateDriverStatus(driver.driver_id, newStatus)
+                await updateDriverStatus(driverId, this.checked ? 'idle' : 'offline')
                 showNotification(`✅ Status updated to ${label}`, 'success')
             } catch (error) {
                 showNotification('❌ Error updating status: ' + error.message, 'error')
@@ -259,15 +519,23 @@
             }
         })
 
-        // Notification banner
+        // ================================================================
+        //  7.  NOTIFICATION BANNER (DEMO)
+        // ================================================================
+
         const notificationBanner = document.getElementById('notificationBanner')
         const closeNotification = document.getElementById('closeNotification')
-        const acceptDelivery = document.getElementById('acceptDelivery')
-        const declineDelivery = document.getElementById('declineDelivery')
+        const acceptDeliveryBtn = document.getElementById('acceptDelivery')
+        const declineDeliveryBtn = document.getElementById('declineDelivery')
 
-        closeNotification.addEventListener('click', () => notificationBanner.classList.add('hidden'))
+        // Hide notification initially
+        notificationBanner.style.display = 'none'
 
-        acceptDelivery.addEventListener('click', function() {
+        closeNotification.addEventListener('click', () => {
+            notificationBanner.style.display = 'none'
+        })
+
+        acceptDeliveryBtn.addEventListener('click', function() {
             this.innerHTML = '<i class="fas fa-check"></i> Accepted!'
             this.style.background = '#2B8A3E'
 
@@ -281,15 +549,20 @@
             }
 
             setTimeout(() => {
-                notificationBanner.classList.add('hidden')
+                notificationBanner.style.display = 'none'
                 this.innerHTML = '<i class="fas fa-check"></i> Accept'
                 this.style.background = ''
             }, 1500)
         })
 
-        declineDelivery.addEventListener('click', () => notificationBanner.classList.add('hidden'))
+        declineDeliveryBtn.addEventListener('click', () => {
+            notificationBanner.style.display = 'none'
+        })
 
-        // Start trip buttons
+        // ================================================================
+        //  8.  START TRIP / DELIVERY BUTTONS
+        // ================================================================
+
         document.getElementById('startTripBtn').addEventListener('click', function() {
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...'
             this.disabled = true
@@ -297,11 +570,11 @@
             setTimeout(async () => {
                 this.innerHTML = '<i class="fas fa-check"></i> Trip Started!'
                 this.style.background = '#2B8A3E'
-                document.querySelector('.passenger-ride-header .badge-success').textContent = 'In Progress'
 
                 try {
-                    await updateDriverStatus(driver.driver_id, 'en-route')
+                    await updateDriverStatus(driverId, 'en-route')
                     showNotification('🚗 Trip started!', 'success')
+                    await loadCurrentTrip()
                 } catch (error) {
                     showNotification('❌ Error: ' + error.message, 'error')
                 }
@@ -321,15 +594,11 @@
             setTimeout(async () => {
                 this.innerHTML = '<i class="fas fa-check"></i> Delivery Started!'
                 this.style.background = '#2B8A3E'
-                const statusBadge = document.querySelector('.delivery-package .badge')
-                if (statusBadge) {
-                    statusBadge.textContent = 'In Progress'
-                    statusBadge.className = 'badge badge-success'
-                }
 
                 try {
-                    await updateDriverStatus(driver.driver_id, 'delivering')
+                    await updateDriverStatus(driverId, 'delivering')
                     showNotification('📦 Delivery started!', 'success')
+                    await loadCurrentTrip()
                 } catch (error) {
                     showNotification('❌ Error: ' + error.message, 'error')
                 }
@@ -342,45 +611,22 @@
             }, 1500)
         })
 
-        // Route map (Leaflet)
-        const routeMapContainer = document.getElementById('routeMap')
-        if (routeMapContainer && typeof L !== 'undefined') {
-            const map = L.map('routeMap', { center: [5.46, 7.02], zoom: 13, zoomControl: false, attributionControl: false })
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '' }).addTo(map)
+        // ================================================================
+        //  9.  ROUTE STOP INTERACTIONS
+        // ================================================================
 
-            const routePoints = [[5.414, 7.016], [5.460, 7.040], [5.478, 7.025]]
-            const polyline = L.polyline(routePoints, { color: '#7b2fbe', weight: 4, opacity: 0.7, dashArray: '8,6' }).addTo(map)
-
-            routePoints.forEach((point, index) => {
-                L.marker([point[0], point[1]], {
-                    icon: L.divIcon({
-                        className: '',
-                        html: `<div style="background:#3B2A60;color:#FFF;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #D3C5F6;box-shadow:0 2px 8px rgba(0,0,0,0.2);">${index + 1}</div>`,
-                        iconSize: [28, 28],
-                        iconAnchor: [14, 14]
-                    })
-                }).bindTooltip(['Pickup A', 'Pickup B', 'Dropoff A'][index], { permanent: false, direction: 'top' }).addTo(map)
-            })
-
-            map.fitBounds(polyline.getBounds(), { padding: [40, 40], maxZoom: 14 })
-        } else {
-            routeMapContainer.innerHTML = `
-                <div style="height:100%;display:flex;align-items:center;justify-content:center;background:#F0EDF5;border-radius:12px;color:#6C757D;flex-direction:column;gap:8px;">
-                    <i class="fas fa-map" style="font-size:32px;color:#D3C5F6;"></i>
-                    <span>Route Map Loading...</span>
-                </div>
-            `
-        }
-
-        // Route stop interactions
-        document.querySelectorAll('.route-stop-item').forEach((item, index) => {
-            item.addEventListener('click', function() {
+        document.addEventListener('click', function(e) {
+            const stopItem = e.target.closest('.route-stop-item')
+            if (stopItem) {
                 document.querySelectorAll('.route-stop-item').forEach(el => el.classList.remove('active'))
-                this.classList.add('active')
-            })
+                stopItem.classList.add('active')
+            }
         })
 
-        // Keyboard shortcuts
+        // ================================================================
+        //  10. KEYBOARD SHORTCUTS
+        // ================================================================
+
         console.log('⌨️ Keyboard Shortcuts: [S] Toggle Status, [A] Accept Delivery, [D] Decline, [T] Start Trip')
 
         document.addEventListener('keydown', (e) => {
@@ -388,11 +634,11 @@
                 statusToggle.checked = !statusToggle.checked
                 statusToggle.dispatchEvent(new Event('change'))
             }
-            if ((e.key === 'a' || e.key === 'A') && !notificationBanner.classList.contains('hidden')) {
-                acceptDelivery.click()
+            if ((e.key === 'a' || e.key === 'A') && notificationBanner.style.display !== 'none') {
+                acceptDeliveryBtn.click()
             }
-            if ((e.key === 'd' || e.key === 'D') && !notificationBanner.classList.contains('hidden')) {
-                declineDelivery.click()
+            if ((e.key === 'd' || e.key === 'D') && notificationBanner.style.display !== 'none') {
+                declineDeliveryBtn.click()
             }
             if (e.key === 't' || e.key === 'T') {
                 const type = document.getElementById('assignmentType').textContent
@@ -400,12 +646,93 @@
                 else if (type === 'Delivery') document.getElementById('startDeliveryBtn').click()
             }
         })
+
+        // ================================================================
+        //  11. INITIAL LOAD
+        // ================================================================
+
+        console.log('🚀 Loading driver page...')
+        await loadDriverStats()
+        await loadCurrentTrip()
+
+        // Refresh every 30 seconds
+        setInterval(async () => {
+            await loadCurrentTrip()
+            await loadDriverStats()
+        }, 30000)
+
+        console.log('✅ Driver page fully loaded')
+        console.log('🔄 Auto-refresh every 30 seconds')
     </script>
 
     <style>
         @keyframes slideUp {
             0% { opacity: 0; transform: translateY(20px); }
             100% { opacity: 1; transform: translateY(0); }
+        }
+        .badge-secondary {
+            background: #6C757D;
+            color: #FFFFFF;
+        }
+        #routeMap {
+            height: 250px;
+            width: 100%;
+            border-radius: 8px;
+            background: #E9ECEF;
+        }
+        .route-stop-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .route-stop-item:hover {
+            background: #F0EDF5;
+        }
+        .route-stop-item.active {
+            background: #F0EDF5;
+            border-left: 3px solid #D3C5F6;
+        }
+        .route-stop-item .stop-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #D3C5F6;
+            color: #3B2A60;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .route-stop-item.active .stop-number {
+            background: #3B2A60;
+            color: #FFFFFF;
+        }
+        .route-stop-item .stop-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #3B2A60;
+            width: 80px;
+        }
+        .route-stop-item .stop-location {
+            font-size: 12px;
+            color: #6C757D;
+        }
+        .assignment-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .assignment-actions .btn {
+            flex: 1;
+            min-width: 100px;
+            justify-content: center;
         }
     </style>
 

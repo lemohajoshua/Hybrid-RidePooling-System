@@ -97,8 +97,9 @@
     </div>
 
     <script type="module">
-        import { signUp } from '../../assets/js/supabase-client.js'
+        import { registerDriver } from '../../assets/js/api.js'
 
+        // Notification function
         function showNotification(message, type) {
             const existing = document.querySelector('.auth-notification');
             if (existing) existing.remove();
@@ -124,6 +125,7 @@
             }, 4000);
         }
 
+        // Password toggle
         document.querySelectorAll('.password-toggle').forEach(toggle => {
             toggle.addEventListener('click', function() {
                 const wrapper = this.closest('.password-wrapper');
@@ -149,17 +151,20 @@
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
             const vehicleType = document.getElementById('vehicleType').value;
+            const plateNumber = document.getElementById('plateNumber').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const termsAccepted = document.getElementById('termsAccepted').checked;
 
-            if (!firstName || !lastName || !email || !phone || !vehicleType || !password) {
+            // ---- FIXED VALIDATION (Option 1) ----
+            if (!firstName || !lastName || !email || !phone || !vehicleType || !plateNumber || !password) {
                 showNotification('Please fill in all required fields.', 'error');
                 return;
             }
 
-            if (!email.includes('@')) {
-                showNotification('Please enter a valid email address.', 'error');
+            // Simple email check (only check if it's not empty)
+            if (!email || email.length < 3) {
+                showNotification('❌ Please enter an email address.', 'error');
                 return;
             }
 
@@ -184,15 +189,16 @@
             submitBtn.disabled = true;
 
             try {
-                const userData = {
+                const data = {
                     name: firstName + ' ' + lastName,
                     phone: phone,
-                    vehicleType: vehicleType,
-                    vehicleCapacity: 4
+                    email: email,
+                    vehicle_type: vehicleType,
+                    vehicle_capacity: 4,
+                    password: password
                 };
 
-                await signUp(email, password, userData, 'driver');
-
+                const result = await registerDriver(data);
                 showNotification('🚗 Driver account created successfully! Redirecting to login...', 'success');
 
                 setTimeout(() => {
@@ -200,6 +206,7 @@
                 }, 2000);
 
             } catch (error) {
+                console.error('Registration error:', error);
                 showNotification('❌ Registration failed: ' + error.message, 'error');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
