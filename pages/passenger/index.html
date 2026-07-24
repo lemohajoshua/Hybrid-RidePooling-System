@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Passenger - RidePool+</title>
+    <title>Driver - RidePool+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../../assets/css/style.css" />
-    <link rel="stylesheet" href="passenger.css" />
+    <link rel="stylesheet" href="driver.css" />
 </head>
 <body>
 
@@ -20,11 +20,11 @@
             <ul class="nav-links">
                 <li><a href="../landing/index.html">Home</a></li>
                 <li><a href="../dashboard/index.html">Dashboard</a></li>
-                <li><a href="../passenger/index.html" class="active">Passenger</a></li>
-                <li><a href="../driver/index.html">Driver</a></li>
+                <li><a href="../passenger/index.html">Passenger</a></li>
+                <li><a href="../driver/index.html" class="active">Driver</a></li>
                 <li><a href="../delivery/index.html">Send Delivery</a></li>
                 <li><a href="../admin/index.html">Admin</a></li>
-                <li><a href="#" id="logoutBtn" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Logout</a></li>
+                <li><a href="../auth/login.html" class="btn btn-outline-light btn-sm" style="padding:6px 16px;">Sign In</a></li>
             </ul>
             <button class="hamburger" id="hamburger">
                 <i class="fas fa-bars"></i>
@@ -34,138 +34,57 @@
 
     <div class="page-header">
         <div class="page-header-content">
-            <h1><i class="fas fa-user"></i> Request a Ride</h1>
-            <p>Find ride-pooling options and save up to 30% on your journey</p>
+            <div class="header-left">
+                <div class="driver-avatar"><span>🚗</span></div>
+                <div class="driver-info">
+                    <h1 id="driverName">Loading...</h1>
+                    <p><i class="fas fa-id-card"></i> Driver ID: <span id="driverId">Loading...</span></p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-badge online" id="statusBadge">
+                    <span class="status-dot"></span>
+                    <span id="statusText">Online</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="statusToggle" checked />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
         </div>
     </div>
 
-    <div class="passenger-container">
+    <div class="driver-container">
 
-        <div class="ride-request-card card">
+        <div class="assignment-card card">
             <div class="card-header">
-                <h2><i class="fas fa-route"></i> Where are you going?</h2>
+                <h2><i class="fas fa-clipboard-list"></i> Current Assignment</h2>
+                <span class="badge badge-primary" id="assignmentType">Ride-Pooling</span>
             </div>
 
-            <div class="form-step">
-                <div class="form-group">
-                    <label for="pickup"><i class="fas fa-map-pin"></i> Pickup Location</label>
-                    <input type="text" id="pickup" placeholder="Enter pickup address" value="FUTO Gate, Owerri" />
-                </div>
-                <div class="form-group">
-                    <label for="destination"><i class="fas fa-flag-checkered"></i> Destination</label>
-                    <input type="text" id="destination" placeholder="Enter destination address" value="World Bank Housing Estate" />
-                </div>
-                <button class="btn btn-outline btn-sm" id="useCurrentLocation">
-                    <i class="fas fa-location-dot"></i> Use Current Location
-                </button>
-            </div>
-
-            <div class="form-divider"></div>
-
-            <div class="form-step">
-                <h3><i class="fas fa-clock"></i> When do you need to go?</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="date">Date</label>
-                        <input type="date" id="date" />
+            <div class="assignment-content" id="noAssignment">
+                <div style="text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-car" style="font-size: 48px; color: #D3C5F6; margin-bottom: 16px; display: block;"></i>
+                    <h3 style="color: #3B2A60; margin-bottom: 8px;">No Current Assignment</h3>
+                    <p style="color: #6C757D;">You are currently idle. Wait for a ride or delivery request.</p>
+                    <div style="margin-top: 16px;">
+                        <span class="badge badge-success" id="statusBadgeDisplay">Online</span>
+                        <span class="badge badge-primary">Available</span>
                     </div>
-                    <div class="form-group">
-                        <label for="time">Time</label>
-                        <input type="time" id="time" value="09:30" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-divider"></div>
-
-            <div class="form-step">
-                <h3><i class="fas fa-car"></i> Ride Options</h3>
-                <div class="ride-toggle-group">
-                    <button class="ride-toggle" id="soloToggle">
-                        <i class="fas fa-user"></i> Solo Ride
-                    </button>
-                    <button class="ride-toggle active" id="poolToggle">
-                        <i class="fas fa-users"></i> Pooled Ride
-                        <span class="badge badge-success">Save 30%</span>
-                    </button>
-                </div>
-                <p class="ride-info" id="rideInfo">
-                    <i class="fas fa-info-circle"></i> Pooled rides save up to 30% on fare and help reduce traffic congestion.
-                </p>
-            </div>
-
-            <button class="btn btn-primary btn-lg btn-full" id="findRideBtn">
-                <i class="fas fa-search"></i> Find My Ride
-            </button>
-        </div>
-
-        <div class="match-results card" id="matchResults" style="display: none;">
-            <div class="match-header">
-                <div class="match-badge">
-                    <i class="fas fa-check-circle"></i> We found a match!
-                </div>
-                <button class="btn btn-outline btn-sm" id="closeMatch">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="match-content">
-                <div class="passenger-comparison">
-                    <div class="passenger-card">
-                        <div class="passenger-avatar"><span>🧑</span></div>
-                        <div class="passenger-details">
-                            <h4>You</h4>
-                            <p><i class="fas fa-map-pin"></i> <span id="matchPickup">FUTO Gate</span></p>
-                            <p><i class="fas fa-flag-checkered"></i> <span id="matchDest">World Bank</span></p>
-                        </div>
-                    </div>
-                    <div class="match-arrow">
-                        <i class="fas fa-arrow-right"></i>
-                        <span id="matchMode">Pooling</span>
-                    </div>
-                    <div class="passenger-card">
-                        <div class="passenger-avatar"><span>👨‍💼</span></div>
-                        <div class="passenger-details">
-                            <h4>Michael O. <span class="badge badge-primary">Matched</span></h4>
-                            <p><i class="fas fa-map-pin"></i> Concorde Hotel</p>
-                            <p><i class="fas fa-flag-checkered"></i> World Bank</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="savings-box">
-                    <div class="savings-amount">
-                        <span class="savings-label">You save</span>
-                        <span class="savings-value" id="savingsAmount">₦540</span>
-                        <span class="savings-percent" id="savingsPercent">(30%)</span>
-                    </div>
-                    <div class="savings-detail">
-                        <span id="soloFare">Solo fare: ₦1,800</span>
-                        <span id="pooledFare">Pooled fare: ₦1,260</span>
-                    </div>
-                </div>
-
-                <div class="match-actions">
-                    <button class="btn btn-success btn-lg" id="confirmRideBtn">
-                        <i class="fas fa-check"></i> Confirm Ride
-                    </button>
-                    <button class="btn btn-outline" id="findAnotherBtn">
-                        <i class="fas fa-undo"></i> Find Another
-                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="recent-rides card">
+        <div class="earnings-summary card">
             <div class="card-header">
-                <h2><i class="fas fa-history"></i> Your Recent Rides</h2>
-                <span class="badge badge-primary" id="rideCount">0 trips</span>
+                <h2><i class="fas fa-wallet"></i> Today's Earnings</h2>
+                <span class="badge badge-success" id="earningsChange">+0%</span>
             </div>
-            <div class="ride-history" id="rideHistory">
-                <div class="empty-state" id="emptyState">
-                    <i class="fas fa-car"></i>
-                    <p>No recent rides yet. Book your first ride!</p>
-                </div>
+            <div class="earnings-grid">
+                <div class="earning-item"><span class="earning-label">Today's Earnings</span><span class="earning-value" id="todayEarnings">₦0</span></div>
+                <div class="earning-item"><span class="earning-label">Trips Completed</span><span class="earning-value" id="tripsCompleted">0</span></div>
+                <div class="earning-item"><span class="earning-label">Available Deliveries</span><span class="earning-value" id="availableDeliveries">0</span></div>
+                <div class="earning-item"><span class="earning-label">Rating</span><span class="earning-value">⭐ 4.8</span></div>
             </div>
         </div>
 
@@ -183,51 +102,74 @@
     </footer>
 
     <script type="module">
-        import { requestRide, getPendingRides } from '../../assets/js/api.js'
-
         // ================================================================
-        // CHECK IF USER IS LOGGED IN
+        // CHECK USER AUTH
         // ================================================================
 
-        const userJson = localStorage.getItem('user')
-        console.log('🔍 User from localStorage:', userJson)
-
-        let user = null
-        try {
-            user = JSON.parse(userJson)
-        } catch (e) {
-            console.error('❌ Failed to parse user:', e)
-        }
+        const user = JSON.parse(localStorage.getItem('user'))
 
         if (!user) {
             alert('Please login first')
             window.location.href = '../auth/login.html'
-            // Prevent further execution
-            throw new Error('Redirecting to login')
         }
 
-        console.log('✅ Passenger page loaded for:', user.name)
-
-        // ================================================================
-        // LOGOUT BUTTON
-        // ================================================================
-
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault()
-            localStorage.removeItem('user')
+        if (user.role !== 'driver') {
+            alert('This page is for drivers only')
             window.location.href = '../auth/login.html'
-        })
+        }
+
+        console.log('✅ Driver page loaded for:', user.name)
+
+        const driverId = user.id
 
         // ================================================================
-        // NOTIFICATION FUNCTION
+        // API CALL FUNCTION
+        // ================================================================
+
+        async function apiCall(endpoint, options = {}) {
+            const response = await fetch(`http://localhost:8000/api${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                }
+            })
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(error.detail || 'API Error')
+            }
+            return response.json()
+        }
+
+        // ================================================================
+        // UPDATE DRIVER STATUS (Called by toggle)
+        // ================================================================
+
+        async function updateDriverStatus(status) {
+            try {
+                const result = await apiCall(`/drivers/${driverId}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify(status)
+                })
+                console.log('✅ Status updated:', result)
+                return true
+            } catch (error) {
+                console.error('❌ Error updating status:', error)
+                showNotification('❌ Error updating status: ' + error.message, 'error')
+                return false
+            }
+        }
+
+        // ================================================================
+        // SHOW NOTIFICATION
         // ================================================================
 
         function showNotification(message, type) {
-            const existing = document.querySelector('.passenger-notification');
+            const existing = document.querySelector('.driver-notification');
             if (existing) existing.remove();
 
             const notification = document.createElement('div');
-            notification.className = 'passenger-notification';
+            notification.className = 'driver-notification';
             notification.style.cssText = `
                 position: fixed; bottom: 24px; right: 24px; padding: 14px 20px;
                 border-radius: 12px; background: ${type === 'success' ? '#2B8A3E' : type === 'error' ? '#C92A2A' : '#3B2A60'};
@@ -248,199 +190,116 @@
         }
 
         // ================================================================
-        // SET DEFAULT DATE
+        // LOAD DRIVER STATS
         // ================================================================
 
-        document.getElementById('date').value = new Date().toISOString().split('T')[0]
+        async function loadDriverStats() {
+            try {
+                const data = await apiCall(`/drivers/${driverId}/stats`)
+                console.log('Driver stats:', data)
+
+                document.getElementById('driverName').textContent = data.driver.name || 'Driver'
+                document.getElementById('driverId').textContent = driverId.slice(0, 8) || 'Unknown'
+
+                const stats = data.stats
+                document.getElementById('todayEarnings').textContent = '₦' + (stats.total_earnings || 0).toFixed(0)
+                document.getElementById('tripsCompleted').textContent = stats.completed_trips || 0
+                document.getElementById('availableDeliveries').textContent = stats.available_deliveries || 0
+
+            } catch (error) {
+                console.error('Error loading driver stats:', error)
+            }
+        }
 
         // ================================================================
-        // RIDE TOGGLE (Solo / Pooled)
+        // STATUS TOGGLE - FIXED!
         // ================================================================
 
-        const soloToggle = document.getElementById('soloToggle')
-        const poolToggle = document.getElementById('poolToggle')
-        const rideInfo = document.getElementById('rideInfo')
+        const statusToggle = document.getElementById('statusToggle')
+        const statusBadge = document.getElementById('statusBadge')
+        const statusText = document.getElementById('statusText')
+        const statusBadgeDisplay = document.getElementById('statusBadgeDisplay')
 
-        soloToggle.addEventListener('click', function() {
-            soloToggle.classList.add('active')
-            poolToggle.classList.remove('active')
-            rideInfo.innerHTML = `<i class="fas fa-info-circle"></i> Solo rides are private and direct. No sharing with other passengers.`
-            rideInfo.style.color = '#6C757D'
-        })
+        statusToggle.addEventListener('change', async function() {
+            const isOnline = this.checked
+            const status = isOnline ? 'idle' : 'offline'
+            const label = isOnline ? 'Online' : 'Offline'
 
-        poolToggle.addEventListener('click', function() {
-            poolToggle.classList.add('active')
-            soloToggle.classList.remove('active')
-            rideInfo.innerHTML = `<i class="fas fa-info-circle"></i> Pooled rides save up to 30% on fare and help reduce traffic congestion.`
-            rideInfo.style.color = '#2B8A3E'
-        })
+            // Update UI immediately (optimistic)
+            statusBadge.className = `status-badge ${isOnline ? 'online' : 'offline'}`
+            statusText.textContent = label
+            if (statusBadgeDisplay) {
+                statusBadgeDisplay.textContent = label
+                statusBadgeDisplay.className = `badge ${isOnline ? 'badge-success' : 'badge-secondary'}`
+            }
 
-        // ================================================================
-        // FIND RIDE BUTTON
-        // ================================================================
-
-        const findRideBtn = document.getElementById('findRideBtn')
-        const matchResults = document.getElementById('matchResults')
-        const closeMatch = document.getElementById('closeMatch')
-
-        findRideBtn.addEventListener('click', async function() {
-            const pickup = document.getElementById('pickup').value || 'FUTO Gate'
-            const destination = document.getElementById('destination').value || 'World Bank'
-            const isPooled = poolToggle.classList.contains('active')
-
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...'
-            this.disabled = true
-
-            setTimeout(async () => {
-                this.innerHTML = '<i class="fas fa-search"></i> Find My Ride'
-                this.disabled = false
-
-                try {
-                    // Create ride request using backend API
-                    const rideData = {
-                        passenger_id: user.id,
-                        origin_latitude: 5.4140,
-                        origin_longitude: 7.0160,
-                        destination_latitude: 5.4780,
-                        destination_longitude: 7.0250,
-                        pickup_time_window_start: new Date().toISOString(),
-                        pickup_time_window_end: new Date(Date.now() + 30 * 60000).toISOString()
-                    }
-
-                    const result = await requestRide(rideData)
-
-                    // Update match display
-                    const soloFare = 1800
-                    const pooledFare = 1260
-                    const savings = soloFare - pooledFare
-
-                    document.getElementById('matchPickup').textContent = pickup
-                    document.getElementById('matchDest').textContent = destination
-
-                    if (isPooled) {
-                        document.querySelector('.match-badge').innerHTML = `<i class="fas fa-check-circle"></i> We found a match!`
-                        document.getElementById('savingsAmount').textContent = `₦${savings}`
-                        document.getElementById('savingsPercent').textContent = '(30%)'
-                        document.getElementById('soloFare').textContent = `Solo fare: ₦${soloFare}`
-                        document.getElementById('pooledFare').textContent = `Pooled fare: ₦${pooledFare}`
-                        document.getElementById('matchMode').textContent = 'Pooling'
-                    } else {
-                        document.querySelector('.match-badge').innerHTML = `<i class="fas fa-info-circle"></i> Solo ride confirmed`
-                        document.getElementById('savingsAmount').textContent = `₦0`
-                        document.getElementById('savingsPercent').textContent = '(0%)'
-                        document.getElementById('soloFare').textContent = `Solo fare: ₦${soloFare}`
-                        document.getElementById('pooledFare').textContent = `No savings`
-                        document.getElementById('matchMode').textContent = 'Solo'
-                    }
-
-                    matchResults.style.display = 'block'
-                    matchResults.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
-                    showNotification(`✅ Ride request created! ID: ${result.request_id || 'pending'}`, 'success')
-
-                } catch (error) {
-                    showNotification('❌ Error creating ride: ' + error.message, 'error')
+            // Send to backend
+            const success = await updateDriverStatus(status)
+            if (!success) {
+                // Revert if failed
+                this.checked = !isOnline
+                statusBadge.className = `status-badge ${!isOnline ? 'online' : 'offline'}`
+                statusText.textContent = !isOnline ? 'Online' : 'Offline'
+                if (statusBadgeDisplay) {
+                    statusBadgeDisplay.textContent = !isOnline ? 'Online' : 'Offline'
+                    statusBadgeDisplay.className = `badge ${!isOnline ? 'badge-success' : 'badge-secondary'}`
                 }
-            }, 1500)
-        })
-
-        // ================================================================
-        // CLOSE MATCH RESULTS
-        // ================================================================
-
-        closeMatch.addEventListener('click', function() {
-            matchResults.style.display = 'none'
-        })
-
-        // ================================================================
-        // CONFIRM RIDE
-        // ================================================================
-
-        document.getElementById('confirmRideBtn').addEventListener('click', function() {
-            const isPooled = poolToggle.classList.contains('active')
-            const pickup = document.getElementById('pickup').value || 'FUTO Gate'
-            const destination = document.getElementById('destination').value || 'World Bank'
-
-            // Add to recent rides
-            const historyContainer = document.getElementById('rideHistory')
-            const emptyState = document.getElementById('emptyState')
-            if (emptyState) emptyState.remove()
-
-            const now = new Date()
-            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-
-            const item = document.createElement('div')
-            item.className = 'history-item'
-            item.innerHTML = `
-                <div class="history-icon"><i class="fas ${isPooled ? 'fa-users' : 'fa-car'}"></i></div>
-                <div class="history-details">
-                    <div class="history-route">${pickup} → ${destination}</div>
-                    <div class="history-meta">
-                        <span><i class="far fa-calendar"></i> ${dateStr}</span>
-                        <span><i class="far fa-clock"></i> ${timeStr}</span>
-                        <span class="badge badge-success">Completed</span>
-                        ${isPooled ? '<span class="badge badge-primary">Pooled</span>' : ''}
-                    </div>
-                </div>
-                <div class="history-cost">${isPooled ? '₦1,260' : '₦1,800'}</div>
-            `
-            historyContainer.prepend(item)
-
-            // Update count
-            const countEl = document.getElementById('rideCount')
-            const currentCount = parseInt(countEl.textContent) || 0
-            countEl.textContent = (currentCount + 1) + ' trips'
-
-            // Close match
-            matchResults.style.display = 'none'
-            showNotification('✅ Ride confirmed!', 'success')
-        })
-
-        // ================================================================
-        // FIND ANOTHER
-        // ================================================================
-
-        document.getElementById('findAnotherBtn').addEventListener('click', function() {
-            matchResults.style.display = 'none'
-        })
-
-        // ================================================================
-        // USE CURRENT LOCATION
-        // ================================================================
-
-        document.getElementById('useCurrentLocation').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const lat = pos.coords.latitude.toFixed(6)
-                        const lng = pos.coords.longitude.toFixed(6)
-                        document.getElementById('pickup').value = `📍 ${lat}, ${lng}`
-                        showNotification('📍 Location updated!', 'info')
-                    },
-                    () => {
-                        showNotification('❌ Unable to get location. Please enter manually.', 'error')
-                    }
-                )
             } else {
-                showNotification('❌ Geolocation not supported by your browser.', 'error')
+                showNotification(`✅ Status updated to ${label}`, 'success')
             }
         })
 
         // ================================================================
-        // KEYBOARD SHORTCUT: ENTER TO FIND RIDE
+        // START WITH ONLINE STATUS
         // ================================================================
 
-        document.querySelectorAll('#pickup, #destination').forEach(input => {
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault()
-                    findRideBtn.click()
-                }
-            })
-        })
+        // Set initial status to 'idle' (online)
+        async function initializeDriverStatus() {
+            try {
+                // Get current driver status
+                const data = await apiCall(`/drivers/${driverId}`)
+                const currentStatus = data.status || 'idle'
 
-        console.log('⌨️ Press Enter in pickup/destination fields to find a ride')
+                // If status is 'offline', toggle off
+                if (currentStatus === 'offline') {
+                    statusToggle.checked = false
+                    statusBadge.className = 'status-badge offline'
+                    statusText.textContent = 'Offline'
+                    if (statusBadgeDisplay) {
+                        statusBadgeDisplay.textContent = 'Offline'
+                        statusBadgeDisplay.className = 'badge badge-secondary'
+                    }
+                } else {
+                    statusToggle.checked = true
+                    statusBadge.className = 'status-badge online'
+                    statusText.textContent = 'Online'
+                    if (statusBadgeDisplay) {
+                        statusBadgeDisplay.textContent = 'Online'
+                        statusBadgeDisplay.className = 'badge badge-success'
+                    }
+                    // If status is not idle, set to idle
+                    if (currentStatus !== 'idle') {
+                        await updateDriverStatus('idle')
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing driver status:', error)
+            }
+        }
+
+        // ================================================================
+        // INITIALIZE
+        // ================================================================
+
+        await loadDriverStats()
+        await initializeDriverStatus()
+
+        // Refresh stats every 30 seconds
+        setInterval(loadDriverStats, 30000)
+
+        console.log('✅ Driver page fully loaded')
+        console.log('🔄 Auto-refresh every 30 seconds')
+        console.log('📌 Make sure you are ONLINE to appear in passenger search')
     </script>
 
     <style>
@@ -448,41 +307,40 @@
             0% { opacity: 0; transform: translateY(20px); }
             100% { opacity: 1; transform: translateY(0); }
         }
-        .empty-state {
-            text-align: center;
-            padding: 24px;
-            color: #6C757D;
+        .badge-secondary {
+            background: #6C757D;
+            color: #FFFFFF;
         }
-        .empty-state i {
-            font-size: 32px;
-            color: #D3C5F6;
-            display: block;
-            margin-bottom: 8px;
+        .badge-success {
+            background: #2B8A3E;
+            color: #FFFFFF;
         }
-        .history-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 10px 12px;
-            background: #F8F9FA;
-            border-radius: 8px;
-            margin-bottom: 6px;
+        .badge-warning {
+            background: #E85D04;
+            color: #FFFFFF;
         }
-        .history-icon {
-            width: 32px;
-            height: 32px;
+        .badge-primary {
+            background: #3B2A60;
+            color: #FFFFFF;
+        }
+        .status-badge .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #D3C5F6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #3B2A60;
+            margin-right: 6px;
         }
-        .history-details { flex: 1; }
-        .history-route { font-size: 14px; font-weight: 500; color: #1A1A2E; }
-        .history-meta { display: flex; gap: 8px; font-size: 12px; color: #6C757D; flex-wrap: wrap; }
-        .history-cost { font-size: 15px; font-weight: 600; color: #3B2A60; }
+        .status-badge.online .status-dot {
+            background: #2B8A3E;
+            animation: pulse-dot 1.5s infinite;
+        }
+        .status-badge.offline .status-dot {
+            background: #6C757D;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 
 </body>
