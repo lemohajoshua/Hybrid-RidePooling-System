@@ -3,3 +3,8 @@ uvicorn
 pydantic
 requests
 python-dotenv
+supabase
+h3
+simpy
+geopy
+email-validator

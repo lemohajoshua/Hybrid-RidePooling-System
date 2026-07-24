@@ -7,11 +7,13 @@ from ..database import supabase
 
 router = APIRouter()
 
+
 class RegisterPassengerRequest(BaseModel):
     name: str
     phone: str
     email: EmailStr
     password: str
+
 
 class RegisterDriverRequest(BaseModel):
     name: str
@@ -21,9 +23,11 @@ class RegisterDriverRequest(BaseModel):
     vehicle_capacity: int = 4
     password: str
 
+
 class LoginRequest(BaseModel):
     email: str
     password: str
+
 
 @router.post("/register/passenger")
 async def register_passenger(req: RegisterPassengerRequest):
@@ -45,6 +49,7 @@ async def register_passenger(req: RegisterPassengerRequest):
     result = supabase.table('passengers').insert(data).execute()
     
     return {"message": "Passenger registered successfully", "passenger_id": passenger_id}
+
 
 @router.post("/register/driver")
 async def register_driver(req: RegisterDriverRequest):
@@ -68,6 +73,7 @@ async def register_driver(req: RegisterDriverRequest):
     result = supabase.table('drivers').insert(data).execute()
     
     return {"message": "Driver registered successfully", "driver_id": driver_id}
+
 
 @router.post("/login")
 async def login(req: LoginRequest):

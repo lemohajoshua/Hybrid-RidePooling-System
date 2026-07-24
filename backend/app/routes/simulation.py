@@ -1,7 +1,9 @@
 # routes/simulation.py
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 import uuid
 import random
+from typing import List, Optional
 
 from ..database import supabase
 from .. import algorithms
@@ -13,6 +15,7 @@ simulation_state = {
     "step": 0,
     "is_initialized": False
 }
+
 
 @router.post("/initialize")
 async def initialize_simulation():
@@ -51,7 +54,8 @@ async def initialize_simulation():
             'origin_longitude': p['origin_longitude'],
             'destination_latitude': p['destination_latitude'],
             'destination_longitude': p['destination_longitude'],
-            'status': 'pending'
+            'status': 'pending',
+            'is_pooled': False
         }).execute()
     
     # Insert deliveries
@@ -68,6 +72,7 @@ async def initialize_simulation():
         "deliveries": len(deliveries)
     }
 
+
 @router.post("/step")
 async def step_simulation():
     """Run one step of the simulation."""
@@ -79,8 +84,8 @@ async def step_simulation():
     step = simulation_state['step'] + 1
     simulation_state['step'] = step
     
-    # Get available drivers
-    drivers = supabase.table('drivers').select('*').in_('status', ['idle', 'en-route']).execute()
+    # Get available drivers (ONLY idle drivers)
+    drivers = supabase.table('drivers').select('*').eq('status', 'idle').execute()
     drivers_list = drivers.data
     
     # Get pending rides
@@ -88,7 +93,7 @@ async def step_simulation():
     rides_list = rides.data
     
     # Get pending deliveries
-    deliveries = supabase.table('delivery_tasks').select('*').in_('status', ['pending', 'assigned']).execute()
+    deliveries = supabase.table('delivery_tasks').select('*').eq('status', 'pending').execute()
     deliveries_list = deliveries.data
     
     matched = 0
@@ -99,13 +104,37 @@ async def step_simulation():
         
         if rides_list:
             ride = rides_list[0]
+            trip_id = str(uuid.uuid4())
+            
+            # Check if pooling is possible (another ride to same destination)
+            dest_lat = ride['destination_latitude']
+            dest_lng = ride['destination_longitude']
+            matching_ride = None
+            
+            for r in rides_list[1:]:
+                if (abs(r['destination_latitude'] - dest_lat) < 0.01 and 
+                    abs(r['destination_longitude'] - dest_lng) < 0.01):
+                    matching_ride = r
+                    break
+            
+            is_pooled = False
+            if matching_ride:
+                is_pooled = True
+                request_ids = [ride['request_id'], matching_ride['request_id']]
+                # Mark both rides as matched
+                supabase.table('ride_requests').update({'status': 'matched'}).eq('request_id', matching_ride['request_id']).execute()
+                supabase.table('ride_requests').update({'is_pooled': True}).eq('request_id', ride['request_id']).execute()
+                supabase.table('ride_requests').update({'is_pooled': True}).eq('request_id', matching_ride['request_id']).execute()
+                # Remove matching ride from list
+                rides_list.remove(matching_ride)
+            else:
+                request_ids = [ride['request_id']]
             
             # Create trip
-            trip_id = str(uuid.uuid4())
             supabase.table('trips').insert({
                 'trip_id': trip_id,
                 'driver_id': driver['driver_id'],
-                'request_ids': [ride['request_id']],
+                'request_ids': request_ids,
                 'task_ids': [],
                 'total_distance': random.uniform(3, 10),
                 'total_duration': random.uniform(10, 30),
@@ -120,12 +149,43 @@ async def step_simulation():
             
             matched += 1
             rides_list.pop(0)
+            
+            # Record performance metrics
+            deadhead_dist = random.uniform(0.5, 2.0)
+            passenger_dist = random.uniform(3, 10)
+            
+            # Calculate fare
+            base_fare = 800
+            distance_fare = passenger_dist * 80
+            total_fare = base_fare + distance_fare
+            
+            if is_pooled:
+                passenger_savings = total_fare * 0.30
+                total_fare = total_fare * 0.70
+            else:
+                passenger_savings = 0
+            
+            driver_earnings = total_fare * 0.80
+            
+            supabase.table('performance_metrics').insert({
+                'metric_id': str(uuid.uuid4()),
+                'trip_id': trip_id,
+                'deadhead_distance': deadhead_dist,
+                'passenger_distance': passenger_dist,
+                'delivery_distance': 0,
+                'driver_earnings': driver_earnings,
+                'passenger_savings': passenger_savings,
+                'delivery_revenue': 0,
+                'fuel_consumption': (deadhead_dist + passenger_dist) * 0.08,
+                'emissions': (deadhead_dist + passenger_dist) * 0.18
+            }).execute()
         
         elif deliveries_list:
+            # Try delivery
             delivery = deliveries_list[0]
+            trip_id = str(uuid.uuid4())
             
             # Create trip
-            trip_id = str(uuid.uuid4())
             supabase.table('trips').insert({
                 'trip_id': trip_id,
                 'driver_id': driver['driver_id'],
@@ -147,6 +207,23 @@ async def step_simulation():
             
             matched += 1
             deliveries_list.pop(0)
+            
+            # Record performance metrics
+            deadhead_dist = random.uniform(0.5, 2.0)
+            delivery_dist = random.uniform(3, 8)
+            
+            supabase.table('performance_metrics').insert({
+                'metric_id': str(uuid.uuid4()),
+                'trip_id': trip_id,
+                'deadhead_distance': deadhead_dist,
+                'passenger_distance': 0,
+                'delivery_distance': delivery_dist,
+                'driver_earnings': random.uniform(500, 1500),
+                'passenger_savings': 0,
+                'delivery_revenue': 1200,
+                'fuel_consumption': (deadhead_dist + delivery_dist) * 0.08,
+                'emissions': (deadhead_dist + delivery_dist) * 0.18
+            }).execute()
     
     return {
         "step": step,
@@ -155,6 +232,7 @@ async def step_simulation():
         "rides_pending": len(rides_list),
         "deliveries_pending": len(deliveries_list)
     }
+
 
 @router.post("/run")
 async def run_simulation(steps: int = 10):
@@ -169,35 +247,58 @@ async def run_simulation(steps: int = 10):
         "results": results
     }
 
+
 @router.get("/metrics")
 async def get_metrics():
-    """Get current simulation metrics."""
-    # Get counts
+    """Get current simulation metrics - calculated dynamically."""
+    # Get data from tables
     drivers = supabase.table('drivers').select('*').execute()
     rides = supabase.table('ride_requests').select('*').execute()
     deliveries = supabase.table('delivery_tasks').select('*').execute()
     trips = supabase.table('trips').select('*').execute()
+    metrics = supabase.table('performance_metrics').select('*').execute()
     
+    # Calculate from actual data
+    total_trips = len(trips.data)
     completed_rides = len([r for r in rides.data if r['status'] == 'completed'])
+    total_rides = len(rides.data) if rides.data else 1
     completed_deliveries = len([d for d in deliveries.data if d['status'] == 'delivered'])
-    total_deliveries = len(deliveries.data)
+    total_deliveries = len(deliveries.data) if deliveries.data else 1
     
-    # Calculate metrics
-    deadhead_reduction = 61.3 if trips.data else 0
-    driver_income = 12500 + (len(trips.data) * 500)
-    passenger_cost = 1260
-    delivery_completion = (completed_deliveries / total_deliveries * 100) if total_deliveries > 0 else 0
+    # Calculate deadhead reduction from performance metrics
+    total_deadhead = sum([m.get('deadhead_distance', 0) for m in metrics.data]) if metrics.data else 0
+    total_passenger_dist = sum([m.get('passenger_distance', 0) for m in metrics.data]) if metrics.data else 1
+    
+    # Calculate metrics dynamically
+    deadhead_ratio = (total_deadhead / (total_deadhead + total_passenger_dist)) * 100 if (total_deadhead + total_passenger_dist) > 0 else 0
+    deadhead_reduction = max(0, 100 - deadhead_ratio)
+    
+    # Driver income (average per trip)
+    total_earnings = sum([m.get('driver_earnings', 0) for m in metrics.data]) if metrics.data else 0
+    avg_income = total_earnings / len(drivers.data) if drivers.data and len(drivers.data) > 0 else 0
+    
+    # Passenger cost savings from pooled rides
+    pooled_rides = len([r for r in rides.data if r.get('is_pooled', False)])
+    avg_passenger_cost = 1800
+    if pooled_rides > 0 and total_rides > 0:
+        passenger_cost = avg_passenger_cost * (1 - (pooled_rides / total_rides) * 0.30)
+    else:
+        passenger_cost = avg_passenger_cost
+    
+    # Delivery completion rate
+    delivery_completion = (completed_deliveries / total_deliveries) * 100 if total_deliveries > 0 else 0
     
     return {
-        "deadhead_reduction": deadhead_reduction,
-        "driver_income": driver_income,
-        "passenger_cost": passenger_cost,
-        "delivery_completion": delivery_completion,
-        "total_trips": len(trips.data),
+        "deadhead_reduction": round(deadhead_reduction, 1),
+        "driver_income": round(avg_income, 2),
+        "passenger_cost": round(passenger_cost, 2),
+        "delivery_completion": round(delivery_completion, 1),
+        "total_trips": total_trips,
         "active_drivers": len([d for d in drivers.data if d['status'] != 'offline']),
         "pending_rides": len([r for r in rides.data if r['status'] == 'pending']),
         "pending_deliveries": len([d for d in deliveries.data if d['status'] == 'pending'])
     }
+
 
 @router.get("/status")
 async def get_simulation_status():
@@ -212,4 +313,43 @@ async def get_simulation_status():
         "drivers": len(drivers.data),
         "passengers": len(passengers.data),
         "deliveries": len(deliveries.data)
+    }
+
+
+@router.post("/simulate")
+async def run_agent_simulation(duration_hours: int = 24):
+    """Run agent-based simulation using SimPy."""
+    # Try to import simulation engine
+    try:
+        from ..simulation_engine import SimulationEngine
+        from ..algorithms import generate_synthetic_data
+    except ImportError as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Simulation engine not available: {str(e)}. Please ensure simpy is installed and simulation_engine.py exists."
+        )
+    
+    # Generate data
+    drivers, passengers, deliveries = generate_synthetic_data(6, 18, 8)
+    
+    # Convert to format expected by SimulationEngine
+    driver_data = [{
+        'driver_id': d['driver_id'],
+        'current_latitude': d['current_latitude'],
+        'current_longitude': d['current_longitude'],
+        'vehicle_capacity': d.get('vehicle_capacity', 4)
+    } for d in drivers]
+    
+    passenger_data = passengers
+    delivery_data = deliveries
+    
+    # Create simulation engine
+    engine = SimulationEngine(driver_data, passenger_data, delivery_data)
+    
+    # Run simulation
+    results = engine.run(duration_minutes=duration_hours * 60)
+    
+    return {
+        "message": f"Simulation completed for {duration_hours} hours",
+        "results": results
     }
