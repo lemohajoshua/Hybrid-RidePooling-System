@@ -483,3 +483,13 @@
         font-size: 11px;
     }
 }
+/* ================================================================
+   LIVE TRACKING MAP (new)
+   ================================================================ */
+#trackingMap {
+    height: 260px;
+    width: 100%;
+    border-radius: 10px;
+    background: #E9ECEF;
+    z-index: 1;
+}

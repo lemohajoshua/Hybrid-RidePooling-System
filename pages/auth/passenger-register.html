@@ -82,7 +82,7 @@
     </div>
 
     <script type="module">
-        import { signUp } from '../../assets/js/supabase-client.js'
+        import { registerPassenger } from '../../assets/js/api.js'
 
         function showNotification(message, type) {
             const existing = document.querySelector('.auth-notification');
@@ -169,12 +169,12 @@
             submitBtn.disabled = true;
 
             try {
-                const userData = {
+                await registerPassenger({
                     name: firstName + ' ' + lastName,
-                    phone: phone
-                };
-
-                await signUp(email, password, userData, 'passenger');
+                    phone: phone,
+                    email: email,
+                    password: password
+                });
 
                 showNotification('🎉 Account created successfully! Redirecting to login...', 'success');
 

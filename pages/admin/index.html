@@ -105,6 +105,30 @@
             </div>
         </section>
 
+        <section class="charts-section" id="demand-analysis" style="margin-top:24px;">
+            <div class="chart-card" style="grid-column: 1 / -1;">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-column"></i> Demand Pattern Analysis</h3>
+                    <span class="badge badge-primary" id="demandTotalBadge">Loading...</span>
+                </div>
+                <div class="chart-container">
+                    <p style="font-size:13px; color:#6C757D; margin-bottom:12px;">Ride requests by hour of day (real data from ride_requests)</p>
+                    <div class="hourly-bar-chart" id="hourlyBarChart"></div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;">
+                        <div>
+                            <p style="font-size:13px; color:#6C757D; margin-bottom:10px;">Ride demand by zone type</p>
+                            <div class="bar-chart-horizontal" id="rideZoneChart"></div>
+                        </div>
+                        <div>
+                            <p style="font-size:13px; color:#6C757D; margin-bottom:10px;">Delivery tasks by zone type</p>
+                            <div class="bar-chart-horizontal" id="deliveryZoneChart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="activity-section" id="drivers">
             <div class="activity-header">
                 <h2><i class="fas fa-clock"></i> Recent Activity</h2>
@@ -145,6 +169,48 @@
     </footer>
 
     <script src="../../assets/js/main.js"></script>
+    <script type="module">
+        import { getDemandAnalytics } from '../../assets/js/api.js'
+
+        async function loadDemandAnalytics() {
+            try {
+                const data = await getDemandAnalytics()
+
+                document.getElementById('demandTotalBadge').textContent =
+                    `${data.total_rides} rides · ${data.total_deliveries} deliveries · ${Math.round(data.pooled_ratio * 100)}% pooled`
+
+                const maxCount = Math.max(1, ...data.hourly_ride_demand.map(h => h.count))
+                document.getElementById('hourlyBarChart').innerHTML = data.hourly_ride_demand.map(h => `
+                    <div class="hour-bar-col" title="${h.count} rides at ${h.hour}:00">
+                        <div class="hour-bar" style="height:${Math.max(4, (h.count / maxCount) * 100)}%"></div>
+                        <span class="hour-label">${h.hour}</span>
+                    </div>
+                `).join('')
+
+                const rideZones = data.ride_zone_breakdown
+                const maxRideZone = Math.max(1, rideZones.urban, rideZones['peri-urban'], rideZones.rural)
+                document.getElementById('rideZoneChart').innerHTML = `
+                    <div class="bar-row"><span class="bar-label">Urban</span><div class="bar-track"><div class="bar-fill" style="width:${(rideZones.urban/maxRideZone)*100}%; background:#3B2A60;"></div></div><span class="bar-value">${rideZones.urban}</span></div>
+                    <div class="bar-row"><span class="bar-label">Peri-Urban</span><div class="bar-track"><div class="bar-fill" style="width:${(rideZones['peri-urban']/maxRideZone)*100}%; background:#7B2FBE;"></div></div><span class="bar-value">${rideZones['peri-urban']}</span></div>
+                    <div class="bar-row"><span class="bar-label">Rural</span><div class="bar-track"><div class="bar-fill" style="width:${(rideZones.rural/maxRideZone)*100}%; background:#D3C5F6;"></div></div><span class="bar-value">${rideZones.rural}</span></div>
+                `
+
+                const devZones = data.delivery_zone_breakdown
+                const maxDevZone = Math.max(1, devZones.urban, devZones['peri-urban'], devZones.rural)
+                document.getElementById('deliveryZoneChart').innerHTML = `
+                    <div class="bar-row"><span class="bar-label">Urban</span><div class="bar-track"><div class="bar-fill" style="width:${(devZones.urban/maxDevZone)*100}%; background:#2B8A3E;"></div></div><span class="bar-value">${devZones.urban}</span></div>
+                    <div class="bar-row"><span class="bar-label">Peri-Urban</span><div class="bar-track"><div class="bar-fill" style="width:${(devZones['peri-urban']/maxDevZone)*100}%; background:#57AB5A;"></div></div><span class="bar-value">${devZones['peri-urban']}</span></div>
+                    <div class="bar-row"><span class="bar-label">Rural</span><div class="bar-track"><div class="bar-fill" style="width:${(devZones.rural/maxDevZone)*100}%; background:#A8D5AA;"></div></div><span class="bar-value">${devZones.rural}</span></div>
+                `
+            } catch (error) {
+                console.error('Error loading demand analytics:', error)
+                document.getElementById('demandTotalBadge').textContent = 'Error loading data'
+            }
+        }
+
+        loadDemandAnalytics()
+        setInterval(loadDemandAnalytics, 30000)
+    </script>
     <script type="module">
         import { supabase, getSummaryMetrics } from '../../assets/js/supabase-client.js'
 

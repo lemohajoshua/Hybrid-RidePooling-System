@@ -133,8 +133,9 @@
             msg.innerHTML = '✅ Welcome ' + result.user.name + '! Redirecting...'
             msg.style.color = '#2B8A3E'
 
-            // Save user
+            // Save user + auth token
             localStorage.setItem('user', JSON.stringify(result.user))
+            localStorage.setItem('token', result.token)
 
             // Redirect after 1 second
             setTimeout(() => {

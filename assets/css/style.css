@@ -303,9 +303,152 @@ footer {
     border-color: #D3C5F6;
 }
 
+/* ===== BADGES =====
+   These classes (badge-primary, badge-success, badge-warning, badge-danger,
+   badge-secondary) are referenced throughout driver/passenger/admin pages
+   but were never actually defined anywhere in the project - they were
+   rendering as unstyled plain text. Defined once here so every page picks
+   them up consistently. */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.badge-primary {
+    background: #D3C5F6;
+    color: #3B2A60;
+}
+
+.badge-success {
+    background: rgba(43, 138, 62, 0.12);
+    color: #2B8A3E;
+}
+
+.badge-warning {
+    background: rgba(232, 93, 4, 0.12);
+    color: #E85D04;
+}
+
+.badge-danger {
+    background: rgba(201, 42, 42, 0.12);
+    color: #C92A2A;
+}
+
+.badge-secondary {
+    background: #E9ECEF;
+    color: #6C757D;
+}
+
+/* ===== MODAL (shared: used for the post-trip rating prompt) ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 46, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+}
+
+.modal-box {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+.modal-box h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: #1A1A2E;
+}
+
+.modal-box p {
+    font-size: 14px;
+    color: #6C757D;
+    margin-bottom: 18px;
+}
+
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.star-rating i {
+    font-size: 30px;
+    color: #E9ECEF;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.star-rating i.selected,
+.star-rating i:hover {
+    color: #F5A623;
+    transform: scale(1.1);
+}
+
+.modal-box textarea {
+    width: 100%;
+    border: 1px solid #E9ECEF;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: none;
+    margin-bottom: 16px;
+    min-height: 60px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+    justify-content: center;
+}
+
 /* ===== FORMS ===== */
 .form-group {
     margin-bottom: 16px;
+}
+
+.form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #E9ECEF;
+    background: #FFFFFF;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1A1A2E;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #D3C5F6;
+    box-shadow: 0 0 0 3px rgba(211, 197, 246, 0.25);
 }
 
 .form-group label {
