@@ -37,10 +37,13 @@ class LoginResponse(BaseModel):
 
 class RideRequestCreate(BaseModel):
     passenger_id: str
+    passenger_name: Optional[str] = None
     origin_latitude: float
     origin_longitude: float
     destination_latitude: float
     destination_longitude: float
+    is_pooled: bool = False
+    driver_id: Optional[str] = None  # if set, the request is sent straight to this driver
     pickup_time_window_start: Optional[str] = None
     pickup_time_window_end: Optional[str] = None
 
@@ -53,6 +56,19 @@ class RideRequestResponse(BaseModel):
     destination_longitude: float
     status: str
     request_time: Optional[str] = None
+
+class RideDecision(BaseModel):
+    driver_id: str
+    decision: str  # "accept" | "reject"
+
+class RatingCreate(BaseModel):
+    request_id: str
+    rater_role: str   # "passenger" | "driver"
+    rater_id: str
+    target_role: str  # "passenger" | "driver"
+    target_id: str
+    stars: int
+    comment: Optional[str] = None
 
 # ================================================================
 # DRIVER MODELS
@@ -72,6 +88,15 @@ class DriverResponse(BaseModel):
 class LocationUpdate(BaseModel):
     latitude: float
     longitude: float
+
+class StatusUpdate(BaseModel):
+    status: str
+
+class OnlineToggle(BaseModel):
+    is_online: bool
+
+class CapacityUpdate(BaseModel):
+    vehicle_capacity: int
 
 # ================================================================
 # DELIVERY MODELS

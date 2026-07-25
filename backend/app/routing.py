@@ -57,6 +57,36 @@ def get_route_duration(
     return distance * 2  # 30 km/h = 2 min per km
 
 
+def decode_polyline(encoded: str, precision: int = 5) -> List[Tuple[float, float]]:
+    """
+    Decode a Google/OSRM encoded polyline string into a list of (lat, lng) points.
+    OSRM's default `geometries=polyline` uses precision 5 (1e5), matching Google's format.
+    """
+    coordinates: List[Tuple[float, float]] = []
+    index = lat = lng = 0
+    factor = 10 ** precision
+    length = len(encoded)
+
+    while index < length:
+        for is_lat in (True, False):
+            shift = result = 0
+            while True:
+                b = ord(encoded[index]) - 63
+                index += 1
+                result |= (b & 0x1f) << shift
+                shift += 5
+                if b < 0x20:
+                    break
+            delta = ~(result >> 1) if (result & 1) else (result >> 1)
+            if is_lat:
+                lat += delta
+            else:
+                lng += delta
+        coordinates.append((lat / factor, lng / factor))
+
+    return coordinates
+
+
 def get_route_geometry(
     origin: Tuple[float, float], 
     destination: Tuple[float, float]
@@ -66,15 +96,14 @@ def get_route_geometry(
     """
     try:
         url = f"{OSRM_URL}/route/v1/driving/{origin[1]},{origin[0]};{destination[1]},{destination[0]}"
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, params={"geometries": "polyline"}, timeout=5)
         if response.status_code == 200:
             data = response.json()
             if data.get('routes') and len(data['routes']) > 0:
                 route = data['routes'][0]
-                if route.get('geometry'):
-                    # Decode polyline (simplified)
-                    # In production, use polyline decoder library
-                    return []
+                geometry = route.get('geometry')
+                if geometry:
+                    return decode_polyline(geometry)
     except Exception as e:
         print(f"OSRM error: {e}")
     

@@ -7,8 +7,13 @@ from typing import List, Optional
 
 from ..database import supabase
 from .. import algorithms
+from ..algorithms import InsertionHeuristic, DeadheadReductionScorer, URBAN_ZONES
 
 router = APIRouter()
+
+# Shared algorithm instances (Chapter 3 heuristics)
+insertion_heuristic = InsertionHeuristic(max_detour_factor=1.20)
+deadhead_scorer = DeadheadReductionScorer(high_demand_zones=URBAN_ZONES)
 
 # Simulation state
 simulation_state = {
@@ -105,18 +110,25 @@ async def step_simulation():
         if rides_list:
             ride = rides_list[0]
             trip_id = str(uuid.uuid4())
-            
-            # Check if pooling is possible (another ride to same destination)
-            dest_lat = ride['destination_latitude']
-            dest_lng = ride['destination_longitude']
+            driver_position = (driver['current_latitude'], driver['current_longitude'])
+
+            # Algorithm 1: Insertion Heuristic - can a second rider be inserted
+            # into this driver's route without blowing the max detour factor?
+            ride_pickup = (ride['origin_latitude'], ride['origin_longitude'])
+            ride_dropoff = (ride['destination_latitude'], ride['destination_longitude'])
+
             matching_ride = None
-            
-            for r in rides_list[1:]:
-                if (abs(r['destination_latitude'] - dest_lat) < 0.01 and 
-                    abs(r['destination_longitude'] - dest_lng) < 0.01):
-                    matching_ride = r
+            for candidate in rides_list[1:]:
+                candidate_route = [ride_pickup, ride_dropoff]
+                candidate_pickup = (candidate['origin_latitude'], candidate['origin_longitude'])
+                candidate_dropoff = (candidate['destination_latitude'], candidate['destination_longitude'])
+                match = insertion_heuristic.find_match(
+                    candidate_route, driver_position, candidate_pickup, candidate_dropoff
+                )
+                if match is not None:
+                    matching_ride = candidate
                     break
-            
+
             is_pooled = False
             if matching_ride:
                 is_pooled = True
@@ -181,8 +193,19 @@ async def step_simulation():
             }).execute()
         
         elif deliveries_list:
-            # Try delivery
-            delivery = deliveries_list[0]
+            # Algorithm 2: Deadhead Reduction Scoring - pick the delivery task
+            # that best reduces this driver's empty-driving distance, rather
+            # than just grabbing whichever task happened to be first.
+            driver_position = (driver['current_latitude'], driver['current_longitude'])
+            delivery = max(
+                deliveries_list,
+                key=lambda d: deadhead_scorer.calculate_score(
+                    driver_position,
+                    (d.get('pickup_latitude', 0), d.get('pickup_longitude', 0)),
+                    (d.get('dropoff_latitude', 0), d.get('dropoff_longitude', 0))
+                )
+            )
+            deliveries_list.remove(delivery)
             trip_id = str(uuid.uuid4())
             
             # Create trip
@@ -206,8 +229,7 @@ async def step_simulation():
             supabase.table('drivers').update({'status': 'delivering'}).eq('driver_id', driver['driver_id']).execute()
             
             matched += 1
-            deliveries_list.pop(0)
-            
+
             # Record performance metrics
             deadhead_dist = random.uniform(0.5, 2.0)
             delivery_dist = random.uniform(3, 8)

@@ -28,7 +28,7 @@ H3_RESOLUTION = 8
 
 def get_h3_cell(lat: float, lng: float, resolution: int = H3_RESOLUTION) -> str:
     """Get H3 cell index for a location."""
-    return h3.geo_to_h3(lat, lng, resolution)
+    return h3.latlng_to_cell(lat, lng, resolution)
 
 
 def get_h3_cells_for_zone(center: Tuple[float, float], radius_km: float, resolution: int = H3_RESOLUTION) -> List[str]:
@@ -108,7 +108,7 @@ def calculate_demand_density(
             if cell != driver_cell:
                 # Get cell center (approximate)
                 try:
-                    cell_center = h3.h3_to_geo(cell)
+                    cell_center = h3.cell_to_latlng(cell)
                     dist = haversine(lat, lng, cell_center[0], cell_center[1])
                     if dist < radius_km:
                         nearby_rides.extend(rides_in_cell)
