@@ -66,6 +66,9 @@ async def get_suggested_mode(driver_id: str):
     if not driver_result.data:
         raise HTTPException(status_code=404, detail="Driver not found")
     driver = driver_result.data[0]
+    if driver.get('current_latitude') is None or driver.get('current_longitude') is None:
+        return {"mode": "unknown", "nearby_ride_demand": 0, "nearby_delivery_tasks": 0,
+                "note": "Your location hasn't been detected yet - allow location access in your browser."}
     driver_location = (driver['current_latitude'], driver['current_longitude'])
 
     all_rides = supabase.table('ride_requests').select('*').in_('status', ['pending', 'pending_pool']).execute()

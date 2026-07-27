@@ -75,6 +75,11 @@ async def register_driver(req: RegisterDriverRequest):
         'vehicle_capacity': req.vehicle_capacity,
         'status': 'offline',
         'is_online': False,
+        # Seeded at Owerri Municipal so distance calculations never operate
+        # on null coordinates - overwritten with the driver's real position
+        # the moment they go online (see driver page's location tracking).
+        'current_latitude': 5.483,
+        'current_longitude': 7.035,
         'password_hash': hash_password(req.password)
     }
 

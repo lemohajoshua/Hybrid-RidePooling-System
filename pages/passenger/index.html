@@ -6,7 +6,6 @@
     <title>Passenger - RidePool+</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="../../assets/css/style.css" />
     <link rel="stylesheet" href="passenger.css" />
 </head>
@@ -33,13 +32,16 @@
         </div>
     </nav>
 
+    <!-- ===== SESSION MISMATCH WARNING ===== -->
+    <div id="sessionMismatchBanner" style="display:none; align-items:center; justify-content:space-between; gap:16px; background:#C92A2A; color:#fff; padding:14px 24px; font-size:14px; font-weight:500;">
+        <span><i class="fas fa-triangle-exclamation"></i> Your login session doesn't match this passenger account (likely because a different account was logged into in another tab of this browser). Actions like requesting a ride won't work until you fix this.</span>
+        <button id="sessionRelogBtn" class="btn btn-outline-light btn-sm" style="white-space:nowrap;">Log Out &amp; Log In Again</button>
+    </div>
+
     <div class="page-header">
         <div class="page-header-content">
             <h1><i class="fas fa-user"></i> Welcome, <span id="passengerName">Passenger</span></h1>
-            <p>
-                Book a solo or pooled ride across Owerri &bull;
-                <span class="badge badge-success"><i class="fas fa-wallet"></i> <span id="walletBalance">₦0</span> wallet</span>
-            </p>
+            <p>Book a solo or pooled ride across Owerri</p>
         </div>
     </div>
 
@@ -105,16 +107,38 @@
             <button class="btn btn-outline btn-full" id="cancelFindBtn" style="margin-top:12px;">Cancel</button>
         </div>
 
-        <!-- ===== WAITING FOR A POOL MATCH (pooled rides only) ===== -->
+        <!-- ===== POOL RIDES: JOIN ONE OR START YOUR OWN ===== -->
+        <div class="match-results" id="poolBrowseCard" style="display:none; border-color:#3B2A60;">
+            <div class="match-header">
+                <span class="match-badge" style="color:#3B2A60;"><i class="fas fa-users"></i> Pooled Ride</span>
+                <button class="btn btn-outline btn-sm" id="refreshPoolsBtn"><i class="fas fa-rotate"></i></button>
+            </div>
+
+            <div id="openPoolsSection">
+                <h4 class="pool-section-title"><i class="fas fa-user-friends"></i> Join someone already waiting</h4>
+                <div id="openPoolsList"></div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <div id="startPoolSection">
+                <h4 class="pool-section-title"><i class="fas fa-plus-circle"></i> Or start a new pool - pick a driver</h4>
+                <div id="startPoolDriverList"></div>
+            </div>
+
+            <button class="btn btn-outline btn-full" id="cancelPoolBrowseBtn" style="margin-top:12px;">Cancel</button>
+        </div>
+
+        <!-- ===== WAITING FOR SOMEONE TO JOIN YOUR POOL ===== -->
         <div class="match-results" id="poolWaitingCard" style="display:none; border-color:#3B2A60;">
             <div class="match-header">
-                <span class="match-badge" style="color:#3B2A60;"><i class="fas fa-users"></i> Finding a Pool Match...</span>
+                <span class="match-badge" style="color:#3B2A60;"><i class="fas fa-hourglass-half"></i> Waiting for a Pool Partner</span>
             </div>
             <p style="font-size:14px; color:#6C757D; margin-bottom:16px;">
-                Looking for another passenger heading the same way (Algorithm 1 - insertion heuristic) so you can split the fare. This can take a moment.
+                You've picked <strong id="poolWaitingDriverName">a driver</strong>. Your ride will start as soon as another passenger heading your way joins you - or you can go solo now.
             </p>
             <div class="match-actions">
-                <button class="btn btn-primary" id="bookSoloInsteadBtn">Book Solo Instead</button>
+                <button class="btn btn-primary" id="poolGoSoloBtn">Go Solo With This Driver</button>
                 <button class="btn btn-outline" id="cancelPoolWaitBtn">Cancel</button>
             </div>
         </div>
@@ -130,7 +154,7 @@
             <button class="btn btn-outline btn-full" id="cancelWaitBtn">Cancel Request</button>
         </div>
 
-        <!-- ===== ON TRIP (accepted - live tracking) ===== -->
+        <!-- ===== ON TRIP (accepted) ===== -->
         <div class="match-results" id="onTripCard" style="display:none; border-color:#2B8A3E;">
             <div class="match-header">
                 <span class="match-badge" style="color:#2B8A3E;"><i class="fas fa-car"></i> Driver is on the way</span>
@@ -142,8 +166,8 @@
                     <p id="tripPoolNote" style="display:none;"><i class="fas fa-users"></i> Pooled with <span id="tripPartnerName"></span></p>
                 </div>
             </div>
-            <div id="trackingMap"></div>
-            <p style="font-size:13px; color:#6C757D; margin-top:10px;">Fare: <strong id="tripFare">₦0</strong></p>
+            <p style="font-size:13px; color:#6C757D;">Fare: <strong id="tripFare">₦0</strong></p>
+            <button class="btn btn-outline btn-full" id="cancelTripBtn" style="margin-top:14px;">Cancel Ride</button>
         </div>
 
         <!-- ===== OUTCOME (rejected / timeout) ===== -->
@@ -181,7 +205,6 @@
         </div>
     </footer>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="passenger.js"></script>
 
 </body>

@@ -109,9 +109,11 @@ async def get_delivery(task_id: str):
 
 
 @router.put("/{task_id}/assign")
-async def assign_delivery(task_id: str, body: DeliveryAssign, current_user: dict = Depends(get_current_user)):
-    """A driver accepts a delivery task."""
-    require_self(current_user, body.driver_id, expected_role='driver')
+async def assign_delivery(task_id: str, current_user: dict = Depends(get_current_user)):
+    """A driver accepts a delivery task. Acting driver comes from the verified token."""
+    if current_user.get('role') != 'driver':
+        raise HTTPException(status_code=403, detail="This action requires a driver account")
+    driver_id = current_user['id']
 
     task_result = supabase.table('delivery_tasks').select('*').eq('task_id', task_id).execute()
     if not task_result.data:
@@ -120,12 +122,14 @@ async def assign_delivery(task_id: str, body: DeliveryAssign, current_user: dict
     if task.get('status') != 'pending':
         raise HTTPException(status_code=409, detail="This delivery task is no longer available")
 
-    driver_result = supabase.table('drivers').select('*').eq('driver_id', body.driver_id).execute()
+    driver_result = supabase.table('drivers').select('*').eq('driver_id', driver_id).execute()
     if not driver_result.data:
         raise HTTPException(status_code=404, detail="Driver not found")
     driver = driver_result.data[0]
     if not driver.get('is_online') or driver.get('status') != 'idle':
         raise HTTPException(status_code=409, detail="You must be online and idle to accept a delivery")
+    if driver.get('current_latitude') is None or driver.get('current_longitude') is None:
+        raise HTTPException(status_code=409, detail="Your location isn't available yet - allow location access and try again")
 
     score = deadhead_scorer.calculate_score(
         (driver['current_latitude'], driver['current_longitude']),
@@ -135,13 +139,13 @@ async def assign_delivery(task_id: str, body: DeliveryAssign, current_user: dict
 
     now = datetime.now(timezone.utc).isoformat()
     supabase.table('delivery_tasks').update({
-        'driver_id': body.driver_id,
+        'driver_id': driver_id,
         'status': 'assigned',
         'deadhead_score': round(score, 3),
         'assigned_at': now
     }).eq('task_id', task_id).execute()
 
-    supabase.table('drivers').update({'status': 'delivering'}).eq('driver_id', body.driver_id).execute()
+    supabase.table('drivers').update({'status': 'delivering'}).eq('driver_id', driver_id).execute()
 
     return {"message": "Delivery task assigned", "task_id": task_id, "score": round(score, 3)}
 
@@ -151,9 +155,12 @@ async def update_delivery_status(task_id: str, body: DeliveryStatusUpdate, curre
     """
     Driver progresses a delivery through pending -> assigned -> picked_up ->
     delivered. On 'delivered', the driver is paid a flat delivery fee and
-    freed back to idle (if still online).
+    freed back to idle (if still online). Acting driver comes from the
+    verified token.
     """
-    require_self(current_user, body.driver_id, expected_role='driver')
+    if current_user.get('role') != 'driver':
+        raise HTTPException(status_code=403, detail="This action requires a driver account")
+    driver_id = current_user['id']
 
     valid_statuses = ["picked_up", "delivered", "cancelled"]
     if body.status not in valid_statuses:
@@ -163,7 +170,7 @@ async def update_delivery_status(task_id: str, body: DeliveryStatusUpdate, curre
     if not task_result.data:
         raise HTTPException(status_code=404, detail="Delivery task not found")
     task = task_result.data[0]
-    if task.get('driver_id') != body.driver_id:
+    if task.get('driver_id') != driver_id:
         raise HTTPException(status_code=403, detail="This delivery is not assigned to this driver")
 
     now = datetime.now(timezone.utc).isoformat()
@@ -176,13 +183,13 @@ async def update_delivery_status(task_id: str, body: DeliveryStatusUpdate, curre
     supabase.table('delivery_tasks').update(update).eq('task_id', task_id).execute()
 
     if body.status in ('delivered', 'cancelled'):
-        driver_result = supabase.table('drivers').select('total_earnings, is_online').eq('driver_id', body.driver_id).execute()
+        driver_result = supabase.table('drivers').select('total_earnings, is_online').eq('driver_id', driver_id).execute()
         if driver_result.data:
             d = driver_result.data[0]
             new_status = 'idle' if d.get('is_online') else 'offline'
             driver_update = {'status': new_status}
             if body.status == 'delivered':
                 driver_update['total_earnings'] = (d.get('total_earnings') or 0) + DELIVERY_BASE_FEE
-            supabase.table('drivers').update(driver_update).eq('driver_id', body.driver_id).execute()
+            supabase.table('drivers').update(driver_update).eq('driver_id', driver_id).execute()
 
     return {"message": f"Delivery {body.status}", "task_id": task_id, "earned": DELIVERY_BASE_FEE if body.status == 'delivered' else 0}

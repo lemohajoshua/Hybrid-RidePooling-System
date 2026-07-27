@@ -1,7 +1,9 @@
 # app/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import uvicorn
+import traceback
 from dotenv import load_dotenv
 
 # Import all route modules
@@ -47,6 +49,20 @@ app.include_router(simulation.router, prefix="/api/simulation", tags=["simulatio
 app.include_router(ratings.router, prefix="/api/ratings", tags=["ratings"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(tracking.router, prefix="/api/tracking", tags=["tracking"])
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """
+    Catch anything that isn't already an HTTPException so the browser gets a
+    real JSON error (with CORS headers) instead of a broken connection that
+    shows up as a generic 'failed to fetch'. The real traceback still goes
+    to the backend's console for debugging.
+    """
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Server error: {str(exc)}"}
+    )
 
 @app.get("/")
 async def root():

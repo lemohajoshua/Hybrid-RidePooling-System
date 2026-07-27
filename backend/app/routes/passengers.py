@@ -9,12 +9,13 @@ router = APIRouter()
 def _enrich_with_pool_partner(ride: dict) -> dict:
     ride = dict(ride)
     if ride.get('pool_group_id'):
-        partner = supabase.table('ride_requests').select('passenger_name, passenger_id') \
+        partner = supabase.table('ride_requests').select('passenger_name, passenger_id, status') \
             .eq('pool_group_id', ride['pool_group_id']) \
             .neq('request_id', ride['request_id']) \
             .execute()
         if partner.data:
             ride['pool_partner_name'] = partner.data[0].get('passenger_name')
+            ride['pool_partner_status'] = partner.data[0].get('status')
     return ride
 
 

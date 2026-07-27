@@ -483,13 +483,13 @@
         font-size: 11px;
     }
 }
-/* ================================================================
-   LIVE TRACKING MAP (new)
-   ================================================================ */
-#trackingMap {
-    height: 260px;
-    width: 100%;
-    border-radius: 10px;
-    background: #E9ECEF;
-    z-index: 1;
+
+.pool-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3B2A60;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }

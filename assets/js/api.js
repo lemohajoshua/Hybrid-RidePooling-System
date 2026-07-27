@@ -75,6 +75,17 @@ export async function cancelRide(requestId) {
     return apiCall(`/rides/${requestId}/cancel`, { method: 'PUT' });
 }
 
+export async function getOpenPools(excludePassengerId) {
+    return apiCall(`/rides/open-pools?exclude_passenger_id=${excludePassengerId}`);
+}
+
+export async function joinPool(requestId, data) {
+    return apiCall(`/rides/${requestId}/join`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    });
+}
+
 export async function getPendingRides() {
     return apiCall('/rides/pending');
 }
@@ -95,8 +106,12 @@ export async function getIncomingRequestsForDriver(driverId) {
     return apiCall(`/rides/driver/${driverId}/incoming`);
 }
 
-export async function completeRide(requestId, driverId) {
-    return apiCall(`/rides/${requestId}/complete?driver_id=${driverId}`, {
+export async function getDriverActiveRide(driverId) {
+    return apiCall(`/rides/driver/${driverId}/active`);
+}
+
+export async function completeRide(requestId) {
+    return apiCall(`/rides/${requestId}/complete`, {
         method: 'PUT'
     });
 }
@@ -185,10 +200,9 @@ export async function getDriverTasks(driverId) {
     return apiCall(`/deliveries/driver/${driverId}/tasks`);
 }
 
-export async function assignDelivery(taskId, driverId) {
+export async function assignDelivery(taskId) {
     return apiCall(`/deliveries/${taskId}/assign`, {
-        method: 'PUT',
-        body: JSON.stringify({ driver_id: driverId })
+        method: 'PUT'
     });
 }
 

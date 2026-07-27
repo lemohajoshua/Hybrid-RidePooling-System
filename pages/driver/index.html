@@ -59,12 +59,13 @@
         </div>
     </div>
 
-    <div class="driver-container">
+    <!-- ===== SESSION MISMATCH WARNING ===== -->
+    <div id="sessionMismatchBanner" style="display:none; align-items:center; justify-content:space-between; gap:16px; background:#C92A2A; color:#fff; padding:14px 24px; font-size:14px; font-weight:500;">
+        <span><i class="fas fa-triangle-exclamation"></i> Your login session doesn't match this driver account (likely because a different account was logged into in another tab of this browser). Actions like Accept/Reject won't work until you fix this.</span>
+        <button id="sessionRelogBtn" class="btn btn-outline-light btn-sm" style="white-space:nowrap;">Log Out &amp; Log In Again</button>
+    </div>
 
-        <!-- ===== SUGGESTED MODE (Algorithm 3 - live) ===== -->
-        <div class="suggested-mode-card card" id="suggestedModeCard" style="display:none;">
-            <div class="suggested-mode-content" id="suggestedModeContent"></div>
-        </div>
+    <div class="driver-container">
 
         <!-- ===== INCOMING RIDE REQUESTS ===== -->
         <div class="incoming-requests-card card" id="incomingRequestsCard">
@@ -96,19 +97,12 @@
             </div>
         </div>
 
-        <!-- ===== AVAILABLE DELIVERY TASKS (Algorithm 2 - live) ===== -->
-        <div class="incoming-requests-card card" id="deliveryTasksCard">
+        <!-- ===== ACTIVE DELIVERY PROGRESS - only visible while a delivery is in progress; browsing available tasks happens via the pop-up, not a permanent list here ===== -->
+        <div class="incoming-requests-card card" id="activeDeliveryCard" style="display:none;">
             <div class="card-header">
-                <h2><i class="fas fa-box"></i> Available Delivery Tasks</h2>
-                <button class="btn btn-outline btn-sm" id="refreshDeliveriesBtn"><i class="fas fa-rotate"></i></button>
+                <h2><i class="fas fa-box"></i> Delivery in Progress</h2>
             </div>
-
-            <!-- Active (assigned) delivery -->
-            <div class="active-ride-banner" id="activeDeliveryBanner" style="display:none;">
-                <div class="active-ride-header">
-                    <i class="fas fa-box"></i>
-                    <span>Delivery in progress</span>
-                </div>
+            <div class="active-ride-banner" id="activeDeliveryBanner">
                 <div class="active-ride-route">
                     <div class="route-stop pickup"><i class="fas fa-map-pin"></i> <span id="deliveryPickup">-</span></div>
                     <div class="route-arrow"><i class="fas fa-arrow-down"></i></div>
@@ -120,14 +114,8 @@
                     <button class="btn btn-success btn-sm" id="markDeliveredBtn" style="display:none;"><i class="fas fa-check"></i> Mark Delivered</button>
                 </div>
             </div>
-
-            <div class="request-list" id="deliveryList">
-                <div class="no-requests-msg" id="noDeliveriesMsg">
-                    <i class="fas fa-box-open"></i>
-                    <p>No delivery tasks nearby right now.</p>
-                </div>
-            </div>
         </div>
+
 
         <!-- ===== CURRENT ASSIGNMENT CARD ===== -->
         <div class="assignment-card card" id="assignmentCard">
@@ -264,10 +252,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import {
-            updateDriverStatus, setDriverOnline, getIncomingRequestsForDriver, respondToRide, completeRide,
-            getDriverEarnings, getSuggestedMode, updateDriverLocation,
+            updateDriverStatus, setDriverOnline, getIncomingRequestsForDriver, getDriverActiveRide, respondToRide, completeRide,
+            getDriverEarnings, updateDriverLocation,
             getAvailableDeliveries, getDriverTasks, assignDelivery, updateDeliveryStatus,
-            submitRating, getPendingRatingStatus
+            submitRating
         } from '../../assets/js/api.js'
 
         // ================================================================
@@ -291,6 +279,48 @@
         const driverId = user.id
         let map = null
         let routeLine = null
+
+        // ================================================================
+        //  1b. SESSION CONSISTENCY CHECK
+        // ================================================================
+        // localStorage (where 'user' and 'token' live) is shared across every
+        // tab of the same browser. If a different account was logged into in
+        // another tab since this page loaded, the token here can silently
+        // belong to someone else while 'user' still shows the old name. This
+        // catches that immediately instead of letting it surface later as a
+        // confusing "not sent to this driver" error when accepting a ride.
+
+        function decodeTokenPayload(token) {
+            try {
+                const payloadB64 = token.split('.')[0]
+                const padded = payloadB64 + '='.repeat((4 - payloadB64.length % 4) % 4)
+                return JSON.parse(atob(padded.replace(/-/g, '+').replace(/_/g, '/')))
+            } catch {
+                return null
+            }
+        }
+
+        function checkSessionConsistency() {
+            const token = localStorage.getItem('token')
+            const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+            const payload = token ? decodeTokenPayload(token) : null
+            const banner = document.getElementById('sessionMismatchBanner')
+
+            const mismatched = !token || !payload || !currentUser ||
+                payload.id !== currentUser.id || payload.role !== 'driver' || currentUser.id !== driverId
+
+            banner.style.display = mismatched ? 'flex' : 'none'
+            return !mismatched
+        }
+
+        document.getElementById('sessionRelogBtn').addEventListener('click', () => {
+            localStorage.removeItem('user')
+            localStorage.removeItem('token')
+            window.location.href = '../auth/login.html'
+        })
+
+        checkSessionConsistency()
+        setInterval(checkSessionConsistency, 5000)
 
         // ================================================================
         //  2.  NOTIFICATION FUNCTION
@@ -577,11 +607,10 @@
                 if (this.checked) {
                     startRequestPolling()
                     startLocationTracking()
+                    setTimeout(checkForDeliveryOpportunity, 4000) // give geolocation a moment to resolve first
                 } else {
                     stopRequestPolling()
                     renderIncomingRequests([])
-                    suggestedModeCard.style.display = 'none'
-                    renderDeliveryList([])
                 }
             } catch (error) {
                 showNotification('❌ Error updating status: ' + error.message, 'error')
@@ -680,14 +709,16 @@
             this.disabled = true
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Completing...'
             try {
-                const result = await completeRide(activeRide.request_id, driverId)
+                const result = await completeRide(activeRide.request_id)
                 showNotification(`✅ Ride completed! +₦${Math.round(result.earned)}`, 'success')
+                const finishedRide = activeRide
                 renderActiveRide(null)
                 await pollDriverRequests()
                 await loadEarnings()
-                if (activeRide.passenger_id) {
-                    showRatingModal(activeRide.request_id, activeRide.passenger_id, activeRide.passenger_name || 'your passenger')
+                if (finishedRide.passenger_id) {
+                    showRatingModal(finishedRide.request_id, finishedRide.passenger_id, finishedRide.passenger_name || 'your passenger')
                 }
+                setTimeout(checkForDeliveryOpportunity, 2500)
             } catch (error) {
                 showNotification('❌ Error: ' + error.message, 'error')
             } finally {
@@ -695,6 +726,94 @@
                 this.innerHTML = '<i class="fas fa-check"></i> Mark Ride Completed'
             }
         })
+
+        // ================================================================
+        //  6c. POST-RIDE DELIVERY POPUP
+        //  Triggered specifically right after a ride is completed, if there
+        //  are no other ride requests waiting for this driver nearby -
+        //  rather than always showing the delivery list, this nudges the
+        //  driver toward delivery work exactly when they'd otherwise idle.
+        // ================================================================
+
+        let deliveryPopupOpen = false
+
+        async function checkForDeliveryOpportunity() {
+            if (!statusToggle.checked || deliveryPopupOpen || activeDelivery) return
+            try {
+                const incoming = await getIncomingRequestsForDriver(driverId)
+                if (incoming && incoming.length > 0) return // a ride request is already waiting - no need to nudge
+
+                if (!driverPosition) return
+                const tasks = await getAvailableDeliveries(driverPosition.lat, driverPosition.lng)
+                if (!tasks || tasks.length === 0) return
+
+                showDeliveryOpportunityModal(tasks.slice(0, 3))
+            } catch (error) {
+                console.error('Error checking delivery opportunity:', error)
+            }
+        }
+
+        function showDeliveryOpportunityModal(tasks) {
+            const overlay = document.createElement('div')
+            overlay.className = 'modal-overlay'
+            overlay.innerHTML = `
+                <div class="modal-box" style="max-width:420px; text-align:left;">
+                    <h3 style="text-align:center;">📦 No rides nearby right now</h3>
+                    <p style="text-align:center;">Here are delivery tasks worth taking while you wait:</p>
+                    <div id="popupDeliveryList" style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;"></div>
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" id="dismissDeliveryPopupBtn" style="flex:1;">No Thanks</button>
+                    </div>
+                </div>
+            `
+            document.body.appendChild(overlay)
+            requestAnimationFrame(() => overlay.classList.add('visible'))
+            deliveryPopupOpen = true
+
+            function close() {
+                overlay.classList.remove('visible')
+                deliveryPopupOpen = false
+                setTimeout(() => overlay.remove(), 200)
+            }
+            overlay.querySelector('#dismissDeliveryPopupBtn').addEventListener('click', close)
+
+            const listEl = overlay.querySelector('#popupDeliveryList')
+            listEl.innerHTML = tasks.map(t => `
+                <div class="request-item" data-task-id="${t.task_id}" style="margin-bottom:0;">
+                    <div class="request-info">
+                        <div class="request-route">
+                            <i class="fas fa-map-pin"></i> ${t.pickup_latitude.toFixed(4)}, ${t.pickup_longitude.toFixed(4)}
+                            <i class="fas fa-arrow-right" style="margin:0 6px;"></i>
+                            <i class="fas fa-flag-checkered"></i> ${t.dropoff_latitude.toFixed(4)}, ${t.dropoff_longitude.toFixed(4)}
+                        </div>
+                        <div class="request-meta">
+                            <span><i class="fas fa-box"></i> ${t.package_description || 'Package'}</span>
+                            <span class="badge delivery-score-badge">Score ${t.deadhead_score}</span>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn btn-primary btn-sm popup-accept-btn">Accept</button>
+                    </div>
+                </div>
+            `).join('')
+
+            listEl.querySelectorAll('[data-task-id]').forEach(item => {
+                const taskId = item.dataset.taskId
+                const task = tasks.find(t => t.task_id === taskId)
+                item.querySelector('.popup-accept-btn').addEventListener('click', async () => {
+                    item.querySelectorAll('button').forEach(b => b.disabled = true)
+                    try {
+                        await assignDelivery(task.task_id)
+                        showNotification('📦 Delivery task accepted!', 'success')
+                        renderActiveDelivery(task)
+                        close()
+                    } catch (error) {
+                        showNotification('❌ ' + error.message, 'error')
+                        item.querySelectorAll('button').forEach(b => b.disabled = false)
+                    }
+                })
+            })
+        }
 
         async function pollDriverRequests() {
             try {
@@ -707,17 +826,31 @@
             } catch (error) {
                 console.error('Error polling ride requests:', error)
             }
+
+            if (activeRide) {
+                try {
+                    const active = await getDriverActiveRide(driverId)
+                    if (!active.has_active_ride) {
+                        // The passenger cancelled - free up the UI, matching the
+                        // status the backend already reset the driver to.
+                        showNotification('🚫 The passenger cancelled this ride.', 'info')
+                        renderActiveRide(null)
+                    } else if (active.ride.request_id !== activeRide.request_id) {
+                        // A pooled partner's leg is still active even though
+                        // the one we were showing got cancelled - switch to it.
+                        renderActiveRide(active.ride)
+                    }
+                } catch (error) {
+                    console.error('Error syncing active ride:', error)
+                }
+            }
         }
 
         function startRequestPolling() {
             if (requestPollTimer) return
             pollDriverRequests()
-            loadDeliveryTasks()
-            pollSuggestedMode()
             requestPollTimer = setInterval(() => {
                 pollDriverRequests()
-                loadDeliveryTasks()
-                pollSuggestedMode()
             }, 6000)
         }
 
@@ -745,110 +878,25 @@
         }
 
         // ================================================================
-        //  8.  SUGGESTED MODE (Algorithm 3 - live)
+        //  9.  ACTIVE DELIVERY PROGRESS (Algorithm 2 tasks are only ever
+        //      offered through the pop-up above - this section just tracks
+        //      whichever one the driver has already accepted, if any)
         // ================================================================
 
-        const suggestedModeCard = document.getElementById('suggestedModeCard')
-        const suggestedModeContent = document.getElementById('suggestedModeContent')
-
-        async function pollSuggestedMode() {
-            if (!statusToggle.checked) {
-                suggestedModeCard.style.display = 'none'
-                return
-            }
-            try {
-                const suggestion = await getSuggestedMode(driverId)
-                let html = ''
-                if (suggestion.mode === 'ride-pooling' || suggestion.mode === 'single') {
-                    html = `<i class="fas fa-users icon"></i> <span><strong>${suggestion.nearby_ride_demand} ride request${suggestion.nearby_ride_demand === 1 ? '' : 's'}</strong> nearby - stay put, you're in a good spot for pooling/rides.</span>`
-                } else if (suggestion.mode === 'delivery') {
-                    html = `<i class="fas fa-box icon"></i> <span>Ride demand is low nearby, but there's a <strong>delivery task worth taking</strong> just below - check "Available Delivery Tasks".</span>`
-                } else if (suggestion.reposition_suggestion) {
-                    const r = suggestion.reposition_suggestion
-                    html = `<i class="fas fa-location-arrow icon"></i> <span>It's quiet here. Consider heading toward <strong>${r.zone_name}</strong> (~${r.distance_km}km away) where demand tends to be higher.</span>`
-                } else {
-                    suggestedModeCard.style.display = 'none'
-                    return
-                }
-                suggestedModeContent.innerHTML = html
-                suggestedModeCard.style.display = 'block'
-            } catch (error) {
-                console.error('Error loading suggested mode:', error)
-            }
-        }
-
-        // ================================================================
-        //  9.  DELIVERY TASKS (Algorithm 2 - live scoring)
-        // ================================================================
-
-        const deliveryListEl = document.getElementById('deliveryList')
-        const noDeliveriesMsg = document.getElementById('noDeliveriesMsg')
+        const activeDeliveryCard = document.getElementById('activeDeliveryCard')
         const activeDeliveryBanner = document.getElementById('activeDeliveryBanner')
         const markPickedUpBtn = document.getElementById('markPickedUpBtn')
         const markDeliveredBtn = document.getElementById('markDeliveredBtn')
 
         let activeDelivery = null
 
-        function renderDeliveryList(tasks) {
-            if (activeDelivery) {
-                deliveryListEl.innerHTML = ''
-                deliveryListEl.appendChild(noDeliveriesMsg)
-                noDeliveriesMsg.style.display = 'none'
-                return
-            }
-            if (!tasks || tasks.length === 0) {
-                deliveryListEl.innerHTML = ''
-                deliveryListEl.appendChild(noDeliveriesMsg)
-                noDeliveriesMsg.style.display = 'block'
-                return
-            }
-            noDeliveriesMsg.style.display = 'none'
-            deliveryListEl.innerHTML = tasks.slice(0, 5).map(t => `
-                <div class="request-item" data-task-id="${t.task_id}">
-                    <div class="request-info">
-                        <div class="request-route">
-                            <i class="fas fa-map-pin"></i> ${t.pickup_latitude.toFixed(4)}, ${t.pickup_longitude.toFixed(4)}
-                            <i class="fas fa-arrow-right" style="margin:0 6px;"></i>
-                            <i class="fas fa-flag-checkered"></i> ${t.dropoff_latitude.toFixed(4)}, ${t.dropoff_longitude.toFixed(4)}
-                        </div>
-                        <div class="request-meta">
-                            <span><i class="fas fa-box"></i> ${t.package_description || 'Package'}</span>
-                            <span class="badge delivery-score-badge">Score ${t.deadhead_score}</span>
-                        </div>
-                    </div>
-                    <div class="request-actions">
-                        <button class="btn btn-primary btn-sm accept-delivery-btn"><i class="fas fa-check"></i> Accept</button>
-                    </div>
-                </div>
-            `).join('')
-
-            deliveryListEl.querySelectorAll('[data-task-id]').forEach(item => {
-                const taskId = item.dataset.taskId
-                const task = tasks.find(t => t.task_id === taskId)
-                item.querySelector('.accept-delivery-btn').addEventListener('click', () => acceptDelivery(task, item))
-            })
-        }
-
-        async function acceptDelivery(task, itemEl) {
-            itemEl.querySelectorAll('button').forEach(b => b.disabled = true)
-            try {
-                await assignDelivery(task.task_id, driverId)
-                showNotification('📦 Delivery task accepted!', 'success')
-                renderActiveDelivery(task)
-                await loadDeliveryTasks()
-            } catch (error) {
-                showNotification('❌ ' + error.message, 'error')
-                itemEl.querySelectorAll('button').forEach(b => b.disabled = false)
-            }
-        }
-
         function renderActiveDelivery(task) {
             activeDelivery = task
             if (!task) {
-                activeDeliveryBanner.style.display = 'none'
+                activeDeliveryCard.style.display = 'none'
                 return
             }
-            activeDeliveryBanner.style.display = 'block'
+            activeDeliveryCard.style.display = 'block'
             document.getElementById('deliveryPickup').textContent = `${task.pickup_latitude.toFixed(4)}, ${task.pickup_longitude.toFixed(4)}`
             document.getElementById('deliveryDropoff').textContent = `${task.dropoff_latitude.toFixed(4)}, ${task.dropoff_longitude.toFixed(4)}`
             document.getElementById('deliverySender').textContent = task.sender_name || 'Sender'
@@ -882,8 +930,9 @@
                 const result = await updateDeliveryStatus(activeDelivery.task_id, driverId, 'delivered')
                 showNotification(`✅ Delivered! +₦${result.earned}`, 'success')
                 renderActiveDelivery(null)
-                await loadDeliveryTasks()
                 await loadEarnings()
+                // Check again for more delivery work nearby, same as after a ride completes
+                setTimeout(checkForDeliveryOpportunity, 2500)
             } catch (error) {
                 showNotification('❌ ' + error.message, 'error')
             } finally {
@@ -892,25 +941,14 @@
             }
         })
 
-        async function loadDeliveryTasks() {
+        async function loadActiveDelivery() {
             try {
                 const activeTasks = await getDriverTasks(driverId)
-                if (activeTasks && activeTasks.length > 0) {
-                    renderActiveDelivery(activeTasks[0])
-                    renderDeliveryList([])
-                    return
-                }
-                renderActiveDelivery(null)
-
-                if (!driverPosition) { renderDeliveryList([]); return }
-                const tasks = await getAvailableDeliveries(driverPosition.lat, driverPosition.lng)
-                renderDeliveryList(tasks)
+                renderActiveDelivery(activeTasks && activeTasks.length > 0 ? activeTasks[0] : null)
             } catch (error) {
-                console.error('Error loading delivery tasks:', error)
+                console.error('Error loading active delivery:', error)
             }
         }
-
-        document.getElementById('refreshDeliveriesBtn').addEventListener('click', loadDeliveryTasks)
 
         // ================================================================
         //  10.  LIVE LOCATION TRACKING (browser geolocation -> backend)
@@ -1091,6 +1129,7 @@
         const initialStats = await loadDriverStats()
         await loadCurrentTrip()
         await loadEarnings()
+        await loadActiveDelivery()
 
         if (initialStats && initialStats.driver) {
             const isOnline = !!initialStats.driver.is_online
@@ -1100,6 +1139,7 @@
             if (isOnline) {
                 startRequestPolling()
                 startLocationTracking()
+                setTimeout(checkForDeliveryOpportunity, 4000)
             }
         }
 

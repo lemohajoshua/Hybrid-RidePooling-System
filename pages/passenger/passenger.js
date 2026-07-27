@@ -2,12 +2,12 @@
 import {
     requestRide,
     cancelRide,
+    getOpenPools,
+    joinPool,
     getAvailableDrivers,
     getDriverInfo,
     getPassengerActiveRide,
     getPassengerRides,
-    getPassengerWallet,
-    getRouteBetween,
     submitRating
 } from '../../assets/js/api.js'
 
@@ -29,6 +29,47 @@ if (user.role !== 'passenger') {
 
 const passengerId = user.id
 document.getElementById('passengerName').textContent = user.name || 'Passenger'
+
+// ================================================================
+//  1b. SESSION CONSISTENCY CHECK (see driver page for full explanation -
+//      localStorage is shared across browser tabs, so a login elsewhere
+//      can silently swap this tab's session out from under it)
+// ================================================================
+
+function decodeTokenPayload(token) {
+    try {
+        const payloadB64 = token.split('.')[0]
+        const padded = payloadB64 + '='.repeat((4 - payloadB64.length % 4) % 4)
+        return JSON.parse(atob(padded.replace(/-/g, '+').replace(/_/g, '/')))
+    } catch {
+        return null
+    }
+}
+
+function checkSessionConsistency() {
+    const token = localStorage.getItem('token')
+    const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+    const payload = token ? decodeTokenPayload(token) : null
+    const banner = document.getElementById('sessionMismatchBanner')
+    if (!banner) return
+
+    const mismatched = !token || !payload || !currentUser ||
+        payload.id !== currentUser.id || payload.role !== 'passenger' || currentUser.id !== passengerId
+
+    banner.style.display = mismatched ? 'flex' : 'none'
+}
+
+const relogBtn = document.getElementById('sessionRelogBtn')
+if (relogBtn) {
+    relogBtn.addEventListener('click', () => {
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+        window.location.href = '../auth/login.html'
+    })
+}
+
+checkSessionConsistency()
+setInterval(checkSessionConsistency, 5000)
 
 // ================================================================
 //  2. OWERRI ZONES (must match backend/app/algorithms.py exactly)
@@ -105,19 +146,6 @@ function showNotification(message, type) {
 }
 
 // ================================================================
-//  4. WALLET
-// ================================================================
-
-async function loadWallet() {
-    try {
-        const wallet = await getPassengerWallet(passengerId)
-        document.getElementById('walletBalance').textContent = '₦' + Math.round(wallet.wallet_balance).toLocaleString()
-    } catch (error) {
-        console.error('Error loading wallet:', error)
-    }
-}
-
-// ================================================================
 //  5. RIDE TYPE TOGGLE + FARE ESTIMATE
 // ================================================================
 
@@ -184,6 +212,7 @@ const outcomeDoneBtn = document.getElementById('outcomeDoneBtn')
 function showOnly(section) {
     rideRequestCard.style.display = section === 'form' ? 'block' : 'none'
     driverListCard.style.display = section === 'drivers' ? 'block' : 'none'
+    poolBrowseCard.style.display = section === 'pool_browse' ? 'block' : 'none'
     poolWaitingCard.style.display = section === 'pool_waiting' ? 'block' : 'none'
     waitingCard.style.display = section === 'waiting' ? 'block' : 'none'
     onTripCard.style.display = section === 'ontrip' ? 'block' : 'none'
@@ -194,12 +223,12 @@ function showOnly(section) {
 //  7. FIND DRIVER (solo) -> LIST -> SELECT
 // ================================================================
 
-async function loadAvailableDrivers() {
-    driverListEl.innerHTML = '<div style="text-align:center; padding:16px; color:#6C757D;"><i class="fas fa-spinner fa-spin"></i> Looking for drivers...</div>'
+async function loadAvailableDrivers(targetEl, onSelect) {
+    targetEl.innerHTML = '<div style="text-align:center; padding:16px; color:#6C757D;"><i class="fas fa-spinner fa-spin"></i> Looking for drivers...</div>'
     try {
         const drivers = await getAvailableDrivers()
         if (!drivers || drivers.length === 0) {
-            driverListEl.innerHTML = `
+            targetEl.innerHTML = `
                 <div style="text-align:center; padding:24px 12px; color:#6C757D;">
                     <i class="fas fa-car-side" style="font-size:32px; color:#D3C5F6; display:block; margin-bottom:10px;"></i>
                     No drivers are online right now. Try refreshing in a moment.
@@ -207,7 +236,7 @@ async function loadAvailableDrivers() {
             return
         }
 
-        driverListEl.innerHTML = drivers.map(d => `
+        targetEl.innerHTML = drivers.map(d => `
             <div class="passenger-card" style="margin-bottom:10px; cursor:pointer;" data-driver-id="${d.driver_id}">
                 <div class="passenger-avatar">🚗</div>
                 <div class="passenger-details" style="flex:1;">
@@ -218,13 +247,13 @@ async function loadAvailableDrivers() {
             </div>
         `).join('')
 
-        driverListEl.querySelectorAll('[data-driver-id]').forEach(card => {
+        targetEl.querySelectorAll('[data-driver-id]').forEach(card => {
             const driverId = card.dataset.driverId
             const driver = drivers.find(d => d.driver_id === driverId)
-            card.querySelector('.select-driver-btn').addEventListener('click', () => selectDriver(driver))
+            card.querySelector('.select-driver-btn').addEventListener('click', () => onSelect(driver))
         })
     } catch (error) {
-        driverListEl.innerHTML = `<div style="text-align:center; padding:16px; color:#C92A2A;">Error loading drivers: ${error.message}</div>`
+        targetEl.innerHTML = `<div style="text-align:center; padding:16px; color:#C92A2A;">Error loading drivers: ${error.message}</div>`
     }
 }
 
@@ -237,23 +266,106 @@ findDriverBtn.addEventListener('click', () => {
     }
 
     if (isPooled) {
-        startPoolMatch()
+        showOnly('pool_browse')
+        loadPoolBrowseScreen()
     } else {
         showOnly('drivers')
-        loadAvailableDrivers()
+        loadAvailableDrivers(driverListEl, selectDriver)
     }
 })
 
-document.getElementById('refreshDriversBtn').addEventListener('click', loadAvailableDrivers)
+document.getElementById('refreshDriversBtn').addEventListener('click', () => loadAvailableDrivers(driverListEl, selectDriver))
 document.getElementById('cancelFindBtn').addEventListener('click', () => showOnly('form'))
 
 // ================================================================
-//  8. POOLED RIDE - AUTO MATCH (Algorithm 1, live)
+//  8. POOLED RIDE - browse existing pools to join, or start your own
 // ================================================================
 
-let currentRequestId = null
+const poolBrowseCard = document.getElementById('poolBrowseCard')
+const openPoolsList = document.getElementById('openPoolsList')
+const startPoolDriverList = document.getElementById('startPoolDriverList')
+const poolWaitingDriverName = document.getElementById('poolWaitingDriverName')
 
-async function startPoolMatch() {
+let currentRequestId = null
+let currentDriverId = null
+
+async function loadPoolBrowseScreen() {
+    openPoolsList.innerHTML = '<div style="text-align:center; padding:12px; color:#6C757D;"><i class="fas fa-spinner fa-spin"></i> Checking for open pools...</div>'
+    try {
+        const pools = await getOpenPools(passengerId)
+        if (!pools || pools.length === 0) {
+            openPoolsList.innerHTML = `<div style="text-align:center; padding:16px; color:#6C757D; font-size:13px;">No one's waiting for a pool partner right now.</div>`
+        } else {
+            const withDriverNames = await Promise.all(pools.map(async p => {
+                try {
+                    const d = await getDriverInfo(p.driver_id)
+                    return { ...p, driverName: d.name }
+                } catch {
+                    return { ...p, driverName: 'a driver' }
+                }
+            }))
+            openPoolsList.innerHTML = withDriverNames.map(p => `
+                <div class="passenger-card" style="margin-bottom:10px;" data-pool-id="${p.request_id}">
+                    <div class="passenger-avatar">👤</div>
+                    <div class="passenger-details" style="flex:1;">
+                        <h4>${p.passenger_name || 'A passenger'}</h4>
+                        <p><i class="fas fa-map-pin"></i> ${p.origin_latitude.toFixed(3)}, ${p.origin_longitude.toFixed(3)} → ${p.destination_latitude.toFixed(3)}, ${p.destination_longitude.toFixed(3)}</p>
+                        <p><i class="fas fa-car"></i> Driver: ${p.driverName}</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm join-pool-btn">Join</button>
+                </div>
+            `).join('')
+
+            openPoolsList.querySelectorAll('[data-pool-id]').forEach(card => {
+                const poolId = card.dataset.poolId
+                card.querySelector('.join-pool-btn').addEventListener('click', (e) => joinExistingPool(poolId, e.target))
+            })
+        }
+    } catch (error) {
+        openPoolsList.innerHTML = `<div style="text-align:center; padding:16px; color:#C92A2A; font-size:13px;">Error: ${error.message}</div>`
+    }
+
+    loadAvailableDrivers(startPoolDriverList, startNewPool)
+}
+
+document.getElementById('refreshPoolsBtn').addEventListener('click', loadPoolBrowseScreen)
+document.getElementById('cancelPoolBrowseBtn').addEventListener('click', () => showOnly('form'))
+
+async function joinExistingPool(poolRequestId, buttonEl) {
+    buttonEl.disabled = true
+    buttonEl.textContent = 'Joining...'
+    const origin = LOCATIONS[pickupSelect.value]
+    const dest = LOCATIONS[destinationSelect.value]
+
+    try {
+        const result = await joinPool(poolRequestId, {
+            passenger_id: passengerId,
+            passenger_name: user.name,
+            origin_latitude: origin.lat,
+            origin_longitude: origin.lng,
+            destination_latitude: dest.lat,
+            destination_longitude: dest.lng,
+            is_pooled: true
+        })
+
+        currentRequestId = result.request_id
+        partnerCancelledNotified = false
+        const driver = await getDriverInfo(result.driver_id)
+        waitingDriverName.textContent = driver.name
+        waitingPoolNote.textContent = ' (pooled with another passenger)'
+        showOnly('waiting')
+
+        stopPolling()
+        pollTimer = setInterval(pollActiveRide, 3000)
+        pollActiveRide()
+    } catch (error) {
+        showNotification('❌ ' + error.message, 'error')
+        buttonEl.disabled = false
+        buttonEl.textContent = 'Join'
+    }
+}
+
+async function startNewPool(driver) {
     const origin = LOCATIONS[pickupSelect.value]
     const dest = LOCATIONS[destinationSelect.value]
 
@@ -265,23 +377,15 @@ async function startPoolMatch() {
             origin_longitude: origin.lng,
             destination_latitude: dest.lat,
             destination_longitude: dest.lng,
-            is_pooled: true
-            // no driver_id -> backend tries to auto-match with another
-            // waiting passenger via the insertion heuristic
+            is_pooled: true,
+            driver_id: driver.driver_id
         })
 
         currentRequestId = result.request_id
-
-        if (result.status === 'requested') {
-            // Matched immediately with a driver
-            const driver = await getDriverInfo(result.driver_id)
-            waitingDriverName.textContent = driver.name
-            waitingPoolNote.textContent = ' (pooled with another passenger)'
-            showOnly('waiting')
-        } else {
-            // Parked, waiting for another passenger
-            showOnly('pool_waiting')
-        }
+        partnerCancelledNotified = false
+        currentDriverId = driver.driver_id
+        poolWaitingDriverName.textContent = driver.name
+        showOnly('pool_waiting')
 
         stopPolling()
         pollTimer = setInterval(pollActiveRide, 3000)
@@ -299,14 +403,37 @@ document.getElementById('cancelPoolWaitBtn').addEventListener('click', async () 
     showOnly('form')
 })
 
-document.getElementById('bookSoloInsteadBtn').addEventListener('click', async () => {
+document.getElementById('poolGoSoloBtn').addEventListener('click', async () => {
+    // Convert the open pool into a solo request with the same driver
     stopPolling()
     if (currentRequestId) {
         try { await cancelRide(currentRequestId) } catch { /* best effort */ }
     }
-    soloToggle.click()
-    showOnly('drivers')
-    loadAvailableDrivers()
+    const origin = LOCATIONS[pickupSelect.value]
+    const dest = LOCATIONS[destinationSelect.value]
+    try {
+        const result = await requestRide({
+            passenger_id: passengerId,
+            passenger_name: user.name,
+            origin_latitude: origin.lat,
+            origin_longitude: origin.lng,
+            destination_latitude: dest.lat,
+            destination_longitude: dest.lng,
+            is_pooled: false,
+            driver_id: currentDriverId
+        })
+        currentRequestId = result.request_id
+        partnerCancelledNotified = false
+        const driver = await getDriverInfo(currentDriverId)
+        waitingDriverName.textContent = driver.name
+        waitingPoolNote.textContent = ''
+        showOnly('waiting')
+        stopPolling()
+        pollTimer = setInterval(pollActiveRide, 3000)
+        pollActiveRide()
+    } catch (error) {
+        showNotification('❌ ' + error.message, 'error')
+    }
 })
 
 // ================================================================
@@ -342,6 +469,7 @@ async function selectDriver(driver) {
         })
 
         currentRequestId = result.request_id
+        partnerCancelledNotified = false
         waitingDriverName.textContent = driver.name
         waitingPoolNote.textContent = ''
         showOnly('waiting')
@@ -386,7 +514,11 @@ async function pollActiveRide() {
                 const driver = await getDriverInfo(ride.driver_id)
                 waitingDriverName.textContent = driver.name
             }
-            waitingPoolNote.textContent = ride.pool_group_id ? ' (pooled with another passenger)' : ''
+            waitingPoolNote.textContent = ride.pool_group_id && ride.pool_partner_status !== 'cancelled' ? ' (pooled with another passenger)' : ''
+            if (ride.pool_group_id && ride.pool_partner_status === 'cancelled' && !partnerCancelledNotified) {
+                partnerCancelledNotified = true
+                showNotification('ℹ️ Your pool partner cancelled. Still waiting on the driver for your own ride.', 'info')
+            }
             showOnly('waiting')
         } else if (ride.status === 'accepted') {
             stopPolling()
@@ -437,78 +569,36 @@ document.getElementById('cancelWaitBtn').addEventListener('click', async () => {
 })
 
 // ================================================================
-//  11. ON TRIP - LIVE MAP + WAIT FOR COMPLETION
+//  11. ON TRIP - SIMPLE CONFIRMATION + WAIT FOR COMPLETION
 // ================================================================
 
-let trackingMap = null
-let driverMarker = null
 let tripCompletionTimer = null
+let partnerCancelledNotified = false
 
 async function enterOnTrip(ride) {
     onTripRide = ride
+    partnerCancelledNotified = false
     const driver = await getDriverInfo(ride.driver_id)
     onTripDriver = driver
 
     document.getElementById('tripDriverName').textContent = driver.name
     document.getElementById('tripFare').textContent = '₦' + Math.round(ride.fare || 0).toLocaleString()
 
-    const poolNote = document.getElementById('tripPoolNote')
-    if (ride.pool_group_id && ride.pool_partner_name) {
-        poolNote.style.display = 'block'
-        document.getElementById('tripPartnerName').textContent = ride.pool_partner_name
-    } else {
-        poolNote.style.display = 'none'
-    }
+    updatePoolNote(ride)
 
     showOnly('ontrip')
-    initTrackingMap(ride, driver)
 
     tripCompletionTimer = setInterval(() => pollTripCompletion(ride.request_id), 4000)
     pollTripCompletion(ride.request_id)
 }
 
-function initTrackingMap(ride, driver) {
-    const pickup = [ride.origin_latitude, ride.origin_longitude]
-    const dest = [ride.destination_latitude, ride.destination_longitude]
-
-    if (trackingMap) {
-        trackingMap.remove()
-        trackingMap = null
-    }
-
-    setTimeout(() => {
-        trackingMap = L.map('trackingMap', { zoomControl: true, attributionControl: false })
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(trackingMap)
-
-        L.marker(pickup, { title: 'Pickup' }).addTo(trackingMap).bindPopup('Pickup')
-        L.marker(dest, { title: 'Destination' }).addTo(trackingMap).bindPopup('Destination')
-
-        driverMarker = L.circleMarker([driver.current_latitude, driver.current_longitude], {
-            radius: 9, color: '#2B8A3E', fillColor: '#2B8A3E', fillOpacity: 1
-        }).addTo(trackingMap).bindPopup('Your driver')
-
-        trackingMap.fitBounds([pickup, dest, [driver.current_latitude, driver.current_longitude]], { padding: [30, 30] })
-
-        getRouteBetween(pickup[0], pickup[1], dest[0], dest[1]).then(route => {
-            if (route.geometry && route.geometry.length > 1) {
-                L.polyline(route.geometry, { color: '#3B2A60', weight: 4, opacity: 0.7 }).addTo(trackingMap)
-            }
-        }).catch(() => { /* OSRM may not be configured - markers alone are fine */ })
-
-        driverPositionPoll = setInterval(() => updateDriverMarker(driver.driver_id), 5000)
-    }, 50)
-}
-
-let driverPositionPoll = null
-
-async function updateDriverMarker(driverId) {
-    try {
-        const driver = await getDriverInfo(driverId)
-        if (driverMarker) {
-            driverMarker.setLatLng([driver.current_latitude, driver.current_longitude])
-        }
-    } catch (error) {
-        console.error('Error updating driver position:', error)
+function updatePoolNote(ride) {
+    const poolNote = document.getElementById('tripPoolNote')
+    if (ride.pool_group_id && ride.pool_partner_name && ride.pool_partner_status !== 'cancelled') {
+        poolNote.style.display = 'block'
+        poolNote.innerHTML = `<i class="fas fa-users"></i> Pooled with <span id="tripPartnerName">${ride.pool_partner_name}</span>`
+    } else {
+        poolNote.style.display = 'none'
     }
 }
 
@@ -518,17 +608,45 @@ async function pollTripCompletion(requestId) {
         if (!active.has_active_ride) {
             // No longer active -> assume completed (driver marked it done)
             clearInterval(tripCompletionTimer)
-            if (driverPositionPoll) clearInterval(driverPositionPoll)
             showNotification('✅ Trip completed!', 'success')
-            await loadWallet()
             await loadRideHistory()
             showRatingModal(requestId, onTripDriver.driver_id, onTripDriver.name)
             showOnly('form')
+            return
+        }
+
+        const ride = active.ride
+        onTripRide = ride
+
+        if (ride.pool_group_id && ride.pool_partner_status === 'cancelled' && !partnerCancelledNotified) {
+            partnerCancelledNotified = true
+            showNotification('ℹ️ Your pool partner cancelled their ride. Your driver is still on the way for you.', 'info')
+            updatePoolNote(ride)
         }
     } catch (error) {
         console.error('Error polling trip completion:', error)
     }
 }
+
+document.getElementById('cancelTripBtn').addEventListener('click', async function() {
+    if (!onTripRide) return
+    if (!confirm('Cancel this ride? Your driver will be notified and freed up for other requests.')) return
+
+    this.disabled = true
+    this.textContent = 'Cancelling...'
+    try {
+        await cancelRide(onTripRide.request_id)
+        clearInterval(tripCompletionTimer)
+        showNotification('🚫 Ride cancelled.', 'info')
+        await loadRideHistory()
+        showOnly('form')
+    } catch (error) {
+        showNotification('❌ ' + error.message, 'error')
+    } finally {
+        this.disabled = false
+        this.textContent = 'Cancel Ride'
+    }
+})
 
 // ================================================================
 //  12. RATE THE DRIVER
@@ -641,7 +759,6 @@ async function loadRideHistory() {
 // ================================================================
 
 async function init() {
-    await loadWallet()
     await loadRideHistory()
 
     try {
