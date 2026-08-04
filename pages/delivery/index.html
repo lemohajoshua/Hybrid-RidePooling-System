@@ -212,10 +212,13 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
-        import { supabase, createDeliveryTask, getPendingDeliveries, getCurrentUser } from '../../assets/js/supabase-client.js'
+        import { supabase, createDeliveryTask, getPendingDeliveries } from '../../assets/js/supabase-client.js'
 
-        // Get current user
-        const user = await getCurrentUser()
+        // Auth check - uses the same localStorage-based session as every
+        // other page (login.html signs in through the FastAPI backend, not
+        // Supabase Auth, so supabase.auth.getUser() here would always be
+        // empty even for a fully logged-in user).
+        const user = JSON.parse(localStorage.getItem('user') || 'null')
         if (!user) {
             window.location.href = '../auth/login.html'
         }
