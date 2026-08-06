@@ -246,7 +246,8 @@ def generate_synthetic_data(num_drivers=6, num_passengers=18, num_deliveries=8):
             'vehicle_capacity': 4,
             'current_latitude': pos[0],
             'current_longitude': pos[1],
-            'status': 'idle'
+            'status': 'idle',
+            'is_simulated': True
         })
     
     # Generate passengers and ride requests
@@ -263,7 +264,8 @@ def generate_synthetic_data(num_drivers=6, num_passengers=18, num_deliveries=8):
             'origin_longitude': origin[1],
             'destination_latitude': dest[0],
             'destination_longitude': dest[1],
-            'status': 'pending'
+            'status': 'pending',
+            'is_simulated': True
         })
     
     # Generate deliveries
@@ -280,7 +282,8 @@ def generate_synthetic_data(num_drivers=6, num_passengers=18, num_deliveries=8):
             'dropoff_latitude': dropoff[0],
             'dropoff_longitude': dropoff[1],
             'package_description': random.choice(['Small Parcel', 'Medium Box', 'Large Package', 'Electronics']),
-            'status': 'pending'
+            'status': 'pending',
+            'is_simulated': True
         })
     
     return drivers, passengers, deliveries

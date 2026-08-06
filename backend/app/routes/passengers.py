@@ -1,7 +1,8 @@
 # routes/passengers.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
 from ..database import supabase
+from ..token_auth import get_current_user, require_self
 
 router = APIRouter()
 
@@ -19,14 +20,12 @@ def _enrich_with_pool_partner(ride: dict) -> dict:
     return ride
 
 
-@router.get("/")
-async def get_passengers():
-    result = supabase.table('passengers').select('*').execute()
-    return result.data
-
-
 @router.get("/{passenger_id}")
-async def get_passenger(passenger_id: str):
+async def get_passenger(passenger_id: str, current_user: dict = Depends(get_current_user)):
+    """A passenger's own profile. Requires being logged in as that passenger -
+    this is personal data (name, phone, email), not something another
+    passenger or a driver should be able to look up by ID."""
+    require_self(current_user, passenger_id, expected_role='passenger')
     result = supabase.table('passengers').select('*').eq('passenger_id', passenger_id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="Passenger not found")
@@ -34,7 +33,8 @@ async def get_passenger(passenger_id: str):
 
 
 @router.get("/{passenger_id}/wallet")
-async def get_passenger_wallet(passenger_id: str):
+async def get_passenger_wallet(passenger_id: str, current_user: dict = Depends(get_current_user)):
+    require_self(current_user, passenger_id, expected_role='passenger')
     result = supabase.table('passengers').select('wallet_balance, avg_rating, rating_count').eq('passenger_id', passenger_id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="Passenger not found")
@@ -42,8 +42,9 @@ async def get_passenger_wallet(passenger_id: str):
 
 
 @router.get("/{passenger_id}/rides")
-async def get_passenger_rides(passenger_id: str):
+async def get_passenger_rides(passenger_id: str, current_user: dict = Depends(get_current_user)):
     """Full ride history for a passenger, most recent first."""
+    require_self(current_user, passenger_id, expected_role='passenger')
     result = supabase.table('ride_requests').select('*') \
         .eq('passenger_id', passenger_id) \
         .order('request_time', desc=True) \
@@ -52,7 +53,7 @@ async def get_passenger_rides(passenger_id: str):
 
 
 @router.get("/{passenger_id}/active-ride")
-async def get_passenger_active_ride(passenger_id: str):
+async def get_passenger_active_ride(passenger_id: str, current_user: dict = Depends(get_current_user)):
     """
     The passenger's current in-flight ride request, if any:
     - 'pending_pool'  -> waiting for another passenger to be matched with
@@ -60,6 +61,7 @@ async def get_passenger_active_ride(passenger_id: str):
     - 'accepted'      -> driver is on the way
     Polled by the passenger page so it can update without a page refresh.
     """
+    require_self(current_user, passenger_id, expected_role='passenger')
     result = supabase.table('ride_requests').select('*') \
         .eq('passenger_id', passenger_id) \
         .in_('status', ['pending_pool', 'requested', 'accepted']) \
@@ -74,7 +76,8 @@ async def get_passenger_active_ride(passenger_id: str):
 
 
 @router.get("/{passenger_id}/stats")
-async def get_passenger_stats(passenger_id: str):
+async def get_passenger_stats(passenger_id: str, current_user: dict = Depends(get_current_user)):
+    require_self(current_user, passenger_id, expected_role='passenger')
     passenger_result = supabase.table('passengers').select('*').eq('passenger_id', passenger_id).execute()
     if not passenger_result.data:
         raise HTTPException(status_code=404, detail="Passenger not found")

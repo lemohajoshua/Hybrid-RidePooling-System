@@ -1,7 +1,15 @@
 // assets/js/api.js
 // Frontend API client for connecting to the backend
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// IMPORTANT for deployment: replace 'https://your-backend-url.onrender.com/api'
+// below with your actual deployed backend URL once you have one (see
+// DEPLOYMENT.md). Locally, this automatically uses your local backend - you
+// don't need to touch it for local development.
+const PRODUCTION_API_URL = 'https://your-backend-url.onrender.com/api';
+
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000/api'
+    : PRODUCTION_API_URL;
 
 // ================================================================
 // API CALL HELPER
@@ -139,6 +147,10 @@ export async function getPassengerRides(passengerId) {
 // ================================================================
 // DRIVER API
 // ================================================================
+
+export async function getAllDrivers() {
+    return apiCall('/drivers/');
+}
 
 export async function getAvailableDrivers() {
     return apiCall('/drivers/available');

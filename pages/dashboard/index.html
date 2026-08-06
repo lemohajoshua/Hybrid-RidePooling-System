@@ -121,7 +121,11 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
-        import { supabase, getSummaryMetrics, getPendingRides, getPendingDeliveries, getAvailableDrivers, createTrip } from '../../assets/js/supabase-client.js'
+        import {
+            getAllDrivers, getPendingRides, getPendingDeliveries,
+            initializeSimulation, stepSimulation as apiStepSimulation, runSimulation as apiRunSimulation,
+            getMetrics, getSimulationStatus
+        } from '../../assets/js/api.js'
 
         // ================================================================
         // STATE
@@ -170,8 +174,11 @@
             mapLayers.deliveries.clearLayers()
             mapLayers.routes.clearLayers()
 
-            // Drivers
-            const drivers = await getAvailableDrivers()
+            // Drivers - all of them (simulation-generated drivers aren't
+            // marked online/idle the way real registered drivers are, so
+            // the "available drivers" endpoint used elsewhere in the app
+            // would hide them here)
+            const drivers = await getAllDrivers()
             drivers.forEach(d => {
                 if (d.current_latitude && d.current_longitude) {
                     L.marker([d.current_latitude, d.current_longitude], {
@@ -185,7 +192,7 @@
             rides.forEach(r => {
                 L.marker([r.origin_latitude, r.origin_longitude], {
                     icon: L.divIcon({ className: '', html: '🧑', iconSize: [24, 24] })
-                }).bindTooltip('Ride: ' + (r.passengers?.name || 'Unknown')).addTo(mapLayers.passengers)
+                }).bindTooltip('Ride: ' + (r.passenger_name || 'Unknown')).addTo(mapLayers.passengers)
             })
 
             // Deliveries
@@ -198,21 +205,18 @@
         }
 
         // ================================================================
-        // STATS
+        // STATS - genuinely computed by the backend from the trips and
+        // performance_metrics the simulation actually produced, not
+        // hardcoded placeholder numbers.
         // ================================================================
 
         async function updateStats() {
-            const metrics = await getSummaryMetrics()
+            const metrics = await getMetrics()
 
-            const { data: deliveries } = await supabase.from('delivery_tasks').select('status')
-            const totalDeliveries = deliveries?.length || 0
-            const completedDeliveries = deliveries?.filter(d => d.status === 'delivered').length || 0
-            const completionRate = totalDeliveries > 0 ? Math.round((completedDeliveries / totalDeliveries) * 100) : 0
-
-            document.getElementById('statDeadhead').textContent = '61.3%'
-            document.getElementById('statIncome').textContent = '₦' + (metrics.averageFare || 0).toLocaleString()
-            document.getElementById('statCost').textContent = '₦1,260'
-            document.getElementById('statDelivery').textContent = completionRate + '%'
+            document.getElementById('statDeadhead').textContent = metrics.deadhead_reduction + '%'
+            document.getElementById('statIncome').textContent = '₦' + Math.round(metrics.driver_income || 0).toLocaleString()
+            document.getElementById('statCost').textContent = '₦' + Math.round(metrics.passenger_cost || 0).toLocaleString()
+            document.getElementById('statDelivery').textContent = metrics.delivery_completion + '%'
         }
 
         function updateStepCounter() {
@@ -233,79 +237,71 @@
         }
 
         // ================================================================
-        // SIMULATION
+        // SIMULATION - all matching/scoring now happens server-side in
+        // backend/app/routes/simulation.py, which actually uses Algorithm 1
+        // (Insertion Heuristic) and Algorithm 2 (Deadhead Reduction Scoring)
+        // rather than a naive first-match loop.
         // ================================================================
 
         async function initSimulation() {
             addLog('🔄 Initializing simulation...')
-            isInitialized = true
-            stepCount = 0
-            updateStepCounter()
-            updateSystemStatus('Initialized', 'initialized')
-            enableControls(true)
-            await renderMap()
-            await updateStats()
-            addLog('✅ Simulation initialized successfully!')
+            try {
+                const result = await initializeSimulation()
+                isInitialized = true
+                stepCount = 0
+                updateStepCounter()
+                updateSystemStatus('Initialized', 'initialized')
+                enableControls(true)
+                await renderMap()
+                await updateStats()
+                addLog(`✅ Simulation initialized: ${result.drivers} drivers, ${result.passengers} passengers, ${result.deliveries} deliveries.`)
+            } catch (error) {
+                addLog('❌ Error initializing: ' + error.message)
+            }
         }
 
-        async function stepSimulation() {
+        async function doStep() {
             if (!isInitialized) { addLog('⚠️ Please initialize first.'); return }
 
-            stepCount++
-            updateStepCounter()
+            try {
+                const result = await apiStepSimulation()
+                stepCount = result.step
+                updateStepCounter()
 
-            // Get available drivers and rides
-            const drivers = await getAvailableDrivers()
-            const rides = await getPendingRides()
+                if (result.matched > 0) {
+                    addLog(`🚗 ${result.matched} driver(s) matched this step (${result.rides_pending} rides + ${result.deliveries_pending} deliveries still pending).`)
+                } else {
+                    addLog('ℹ️ No new matches this step.')
+                }
 
-            if (drivers.length === 0) { addLog('⚠️ No available drivers found.'); return }
-            if (rides.length === 0) { addLog('ℹ️ No pending rides. Try generating more.'); return }
-
-            let matched = 0
-            for (const driver of drivers) {
-                if (driver.status !== 'idle') continue
-                const ride = rides.find(r => r.status === 'pending')
-                if (!ride) break
-
-                // Create trip
-                await createTrip({
-                    driverId: driver.driver_id,
-                    requestIds: [ride.request_id],
-                    totalDistance: 5.0,
-                    totalDuration: 15
-                })
-
-                // Update ride status
-                await supabase.from('ride_requests').update({ status: 'matched' }).eq('request_id', ride.request_id)
-                await supabase.from('drivers').update({ status: 'en-route' }).eq('driver_id', driver.driver_id)
-
-                matched++
-                addLog(`🚗 Driver ${driver.name} matched with ride ${ride.request_id.slice(0, 8)}`)
+                await renderMap()
+                await updateStats()
+                updateSystemStatus('Running', 'running')
+            } catch (error) {
+                addLog('❌ Error stepping simulation: ' + error.message)
             }
-
-            if (matched === 0) addLog('ℹ️ No new matches this step.')
-
-            await renderMap()
-            await updateStats()
-            updateSystemStatus('Running', 'running')
         }
 
         async function runMultipleSteps(steps = 10) {
             if (!isInitialized) { addLog('⚠️ Please initialize first.'); return }
             addLog(`▶️ Running ${steps} steps...`)
-            for (let i = 0; i < steps; i++) {
-                await stepSimulation()
-                await new Promise(r => setTimeout(r, 300))
+            try {
+                const result = await apiRunSimulation(steps)
+                result.results.forEach(r => {
+                    stepCount = r.step
+                    addLog(r.matched > 0 ? `🚗 Step ${r.step}: ${r.matched} matched` : `Step ${r.step}: no new matches`)
+                })
+                updateStepCounter()
+                await renderMap()
+                await updateStats()
+                addLog(`✅ ${steps} steps completed.`)
+                updateSystemStatus('Ready', 'ready')
+            } catch (error) {
+                addLog('❌ Error running simulation: ' + error.message)
             }
-            addLog(`✅ ${steps} steps completed.`)
-            updateSystemStatus('Ready', 'ready')
         }
 
         async function resetSimulation() {
-            await supabase.from('trips').delete().neq('trip_id', '00000000-0000-0000-0000-000000000000')
-            await supabase.from('ride_requests').update({ status: 'pending' }).neq('request_id', '00000000-0000-0000-0000-000000000000')
-            await supabase.from('drivers').update({ status: 'idle' }).neq('driver_id', '00000000-0000-0000-0000-000000000000')
-
             const box = document.getElementById('logBox')
             box.innerHTML = '<div class="log-entry">🔄 System reset. Click Initialize to start again.</div>'
 
@@ -315,26 +311,41 @@
             updateSystemStatus('Ready', 'ready')
             enableControls(false)
             document.getElementById('btnInit').disabled = false
-
-            await renderMap()
-            await updateStats()
-            addLog('🔄 System reset.')
         }
 
         // ================================================================
         // WIRE UP BUTTONS
         // ================================================================
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             initMap()
 
             document.getElementById('btnInit').addEventListener('click', initSimulation)
-            document.getElementById('btnStep').addEventListener('click', stepSimulation)
+            document.getElementById('btnStep').addEventListener('click', doStep)
             document.getElementById('btnRun').addEventListener('click', () => runMultipleSteps(10))
             document.getElementById('btnReset').addEventListener('click', resetSimulation)
 
             addLog('🚀 Welcome to the RidePool+ Simulation Dashboard.')
-            addLog('📌 Click "Initialize" to start.')
+
+            // If a simulation was already initialized (e.g. page refresh),
+            // pick up where it left off instead of forcing a re-init.
+            try {
+                const status = await getSimulationStatus()
+                if (status.is_initialized) {
+                    isInitialized = true
+                    stepCount = status.step
+                    updateStepCounter()
+                    updateSystemStatus('Ready', 'ready')
+                    enableControls(true)
+                    await renderMap()
+                    await updateStats()
+                    addLog('↩️ Resumed existing simulation.')
+                } else {
+                    addLog('📌 Click "Initialize" to start.')
+                }
+            } catch {
+                addLog('📌 Click "Initialize" to start.')
+            }
         })
     </script>
 

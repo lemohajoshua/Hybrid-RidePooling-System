@@ -5,6 +5,7 @@ import uuid
 from ..database import supabase
 from ..models import RatingCreate
 from ..token_auth import get_current_user, require_self
+from ..audit import log_action
 
 router = APIRouter()
 
@@ -57,6 +58,7 @@ async def create_rating(req: RatingCreate, current_user: dict = Depends(get_curr
         'rating_count': len(stars_list)
     }).eq(id_field, req.target_id).execute()
 
+    log_action(req.rater_id, req.rater_role, 'rating_submitted', {'target_id': req.target_id, 'target_role': req.target_role, 'stars': req.stars})
     return {"message": "Rating submitted", "rating_id": rating_id, "new_average": avg}
 
 

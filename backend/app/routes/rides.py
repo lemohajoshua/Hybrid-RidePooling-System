@@ -7,6 +7,7 @@ from ..database import supabase
 from ..models import RideRequestCreate, RideDecision
 from ..algorithms import haversine, InsertionHeuristic
 from ..token_auth import get_current_user, require_self
+from ..audit import log_action
 
 router = APIRouter()
 
@@ -213,6 +214,7 @@ async def cancel_ride(request_id: str):
                 new_status = 'idle' if driver_result.data[0].get('is_online') else 'offline'
                 supabase.table('drivers').update({'status': new_status}).eq('driver_id', driver_id).execute()
 
+    log_action(ride.get('passenger_id'), 'passenger', 'ride_cancelled', {'request_id': request_id, 'was_accepted': was_accepted})
     return {"message": "Cancelled", "was_accepted": was_accepted}
 
 
@@ -224,7 +226,7 @@ async def get_pending_rides():
 
 
 @router.get("/driver/{driver_id}/active")
-async def get_driver_active_ride(driver_id: str):
+async def get_driver_active_ride(driver_id: str, current_user: dict = Depends(get_current_user)):
     """
     The driver's current accepted-and-in-progress ride, if any. Polled by
     the driver page so it notices if a passenger cancels after acceptance
@@ -232,6 +234,7 @@ async def get_driver_active_ride(driver_id: str):
     where cancelling one passenger's leg should leave the driver still
     showing the other passenger's leg as active, not just going blank.
     """
+    require_self(current_user, driver_id, expected_role='driver')
     result = supabase.table('ride_requests').select('*') \
         .eq('driver_id', driver_id).eq('status', 'accepted') \
         .order('responded_at', desc=True).limit(1).execute()
@@ -241,8 +244,9 @@ async def get_driver_active_ride(driver_id: str):
 
 
 @router.get("/driver/{driver_id}/incoming")
-async def get_incoming_requests_for_driver(driver_id: str):
+async def get_incoming_requests_for_driver(driver_id: str, current_user: dict = Depends(get_current_user)):
     """Ride requests currently awaiting this driver's decision."""
+    require_self(current_user, driver_id, expected_role='driver')
     result = supabase.table('ride_requests').select('*') \
         .eq('driver_id', driver_id) \
         .eq('status', 'requested') \
@@ -321,6 +325,7 @@ async def respond_to_ride(request_id: str, decision: RideDecision, current_user:
     if decision.decision == 'accept':
         supabase.table('drivers').update({'status': 'en-route'}).eq('driver_id', driver_id).execute()
 
+    log_action(driver_id, 'driver', f'ride_{new_status}', {'request_id': request_id, 'pooled_request_ids': ids_to_update})
     return {"message": f"Ride {new_status}", "request_id": request_id, "status": new_status, "pooled_request_ids": ids_to_update}
 
 
@@ -393,4 +398,5 @@ async def complete_ride(request_id: str, current_user: dict = Depends(get_curren
             'status': new_status
         }).eq('driver_id', driver_id).execute()
 
+    log_action(driver_id, 'driver', 'ride_completed', {'request_ids': [r['request_id'] for r in rides_to_complete], 'earned': total_earned})
     return {"message": "Ride completed", "earned": total_earned, "request_ids": [r['request_id'] for r in rides_to_complete]}

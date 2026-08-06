@@ -47,7 +47,11 @@ async def get_driver(driver_id: str):
 
 
 @router.get("/{driver_id}/earnings")
-async def get_driver_earnings(driver_id: str):
+async def get_driver_earnings(driver_id: str, current_user: dict = Depends(get_current_user)):
+    """A driver's own earnings/payment info. Requires being logged in as
+    that driver - this is exactly the 'driver payment information' the
+    security requirements say passengers must not be able to read."""
+    require_self(current_user, driver_id, expected_role='driver')
     result = supabase.table('drivers').select('total_earnings, avg_rating, rating_count').eq('driver_id', driver_id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="Driver not found")
@@ -191,8 +195,9 @@ async def get_driver_current_trip(driver_id: str):
 
 
 @router.get("/{driver_id}/ride-requests")
-async def get_driver_ride_requests(driver_id: str):
+async def get_driver_ride_requests(driver_id: str, current_user: dict = Depends(get_current_user)):
     """Ride requests sent straight to this driver, still awaiting a decision."""
+    require_self(current_user, driver_id, expected_role='driver')
     result = supabase.table('ride_requests').select('*') \
         .eq('driver_id', driver_id) \
         .eq('status', 'requested') \

@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from ..database import supabase
 from ..algorithms import DeadheadReductionScorer, URBAN_ZONES
 from ..token_auth import get_current_user, require_self
+from ..audit import log_action
 
 router = APIRouter()
 
@@ -91,8 +92,9 @@ async def get_available_deliveries(driver_lat: float, driver_lng: float):
 
 
 @router.get("/driver/{driver_id}/tasks")
-async def get_driver_tasks(driver_id: str):
+async def get_driver_tasks(driver_id: str, current_user: dict = Depends(get_current_user)):
     """This driver's active (not yet delivered) delivery tasks."""
+    require_self(current_user, driver_id, expected_role='driver')
     result = supabase.table('delivery_tasks').select('*') \
         .eq('driver_id', driver_id) \
         .in_('status', ['assigned', 'picked_up']) \
@@ -147,6 +149,7 @@ async def assign_delivery(task_id: str, current_user: dict = Depends(get_current
 
     supabase.table('drivers').update({'status': 'delivering'}).eq('driver_id', driver_id).execute()
 
+    log_action(driver_id, 'driver', 'delivery_assigned', {'task_id': task_id, 'score': round(score, 3)})
     return {"message": "Delivery task assigned", "task_id": task_id, "score": round(score, 3)}
 
 
@@ -192,4 +195,5 @@ async def update_delivery_status(task_id: str, body: DeliveryStatusUpdate, curre
                 driver_update['total_earnings'] = (d.get('total_earnings') or 0) + DELIVERY_BASE_FEE
             supabase.table('drivers').update(driver_update).eq('driver_id', driver_id).execute()
 
+    log_action(driver_id, 'driver', f'delivery_{body.status}', {'task_id': task_id})
     return {"message": f"Delivery {body.status}", "task_id": task_id, "earned": DELIVERY_BASE_FEE if body.status == 'delivered' else 0}

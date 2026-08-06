@@ -6,6 +6,7 @@ import uuid
 from ..database import supabase
 from ..security import hash_password, verify_password
 from ..token_auth import create_token
+from ..audit import log_action
 
 router = APIRouter()
 
@@ -98,6 +99,7 @@ async def login(req: LoginRequest):
         p = passenger.data[0]
         if not verify_password(req.password, p.get('password_hash')):
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        log_action(p['passenger_id'], 'passenger', 'login')
         return {
             "token": create_token(p['passenger_id'], 'passenger'),
             "user": {
@@ -113,6 +115,7 @@ async def login(req: LoginRequest):
         d = driver.data[0]
         if not verify_password(req.password, d.get('password_hash')):
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        log_action(d['driver_id'], 'driver', 'login')
         return {
             "token": create_token(d['driver_id'], 'driver'),
             "user": {

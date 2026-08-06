@@ -2,6 +2,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import os
 import uvicorn
 import traceback
 from dotenv import load_dotenv
@@ -20,8 +21,9 @@ app = FastAPI(
 # Enable CORS for frontend
 # NOTE: "*" must never be combined with allow_credentials=True - browsers reject
 # that combination (and if they didn't, it would allow any site to make
-# authenticated requests to this API). List explicit dev origins instead, and
-# add your deployed frontend origin here when you host it.
+# authenticated requests to this API). List explicit dev origins here, and set
+# the FRONTEND_URL environment variable (in your backend host's dashboard) to
+# your deployed frontend's URL - no code change/redeploy needed to update it.
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -30,6 +32,10 @@ ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
 ]
+
+extra_origin = os.getenv("FRONTEND_URL")
+if extra_origin:
+    ALLOWED_ORIGINS.append(extra_origin.rstrip("/"))
 
 app.add_middleware(
     CORSMiddleware,
@@ -73,4 +79,5 @@ async def health_check():
     return {"status": "healthy", "timestamp": "2026-07-23"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -24,20 +24,30 @@ simulation_state = {
 
 @router.post("/initialize")
 async def initialize_simulation():
-    """Initialize the simulation with synthetic data."""
+    """
+    Initialize the simulation with synthetic data.
+
+    IMPORTANT: only clears data this simulation itself created (rows
+    tagged is_simulated=true, plus the trips/performance_metrics tables
+    which only the simulation ever writes to). Earlier versions of this
+    endpoint deleted every driver/passenger unconditionally, which would
+    wipe out real registered accounts the moment someone clicked
+    "Initialize" on the dashboard - trips/performance_metrics are safe to
+    clear in full since nothing else writes to those tables.
+    """
     global simulation_state
-    
-    # Clear existing data
+
+    # Clear only simulation-owned data
     supabase.table('performance_metrics').delete().neq('metric_id', '00000000-0000-0000-0000-000000000000').execute()
     supabase.table('trips').delete().neq('trip_id', '00000000-0000-0000-0000-000000000000').execute()
-    supabase.table('ride_requests').delete().neq('request_id', '00000000-0000-0000-0000-000000000000').execute()
-    supabase.table('delivery_tasks').delete().neq('task_id', '00000000-0000-0000-0000-000000000000').execute()
-    supabase.table('drivers').delete().neq('driver_id', '00000000-0000-0000-0000-000000000000').execute()
-    supabase.table('passengers').delete().neq('passenger_id', '00000000-0000-0000-0000-000000000000').execute()
-    
+    supabase.table('ride_requests').delete().eq('is_simulated', True).execute()
+    supabase.table('delivery_tasks').delete().eq('is_simulated', True).execute()
+    supabase.table('drivers').delete().eq('is_simulated', True).execute()
+    supabase.table('passengers').delete().eq('is_simulated', True).execute()
+
     # Generate synthetic data
     drivers, passengers, deliveries = algorithms.generate_synthetic_data(6, 18, 8)
-    
+
     # Insert drivers
     for d in drivers:
         supabase.table('drivers').insert(d).execute()
@@ -48,7 +58,8 @@ async def initialize_simulation():
             'passenger_id': p['passenger_id'],
             'name': p['name'],
             'phone_number': p['phone_number'],
-            'email': p['email']
+            'email': p['email'],
+            'is_simulated': True
         }).execute()
         
         # Create ride request
@@ -60,6 +71,7 @@ async def initialize_simulation():
             'destination_latitude': p['destination_latitude'],
             'destination_longitude': p['destination_longitude'],
             'status': 'pending',
+            'is_simulated': True,
             'is_pooled': False
         }).execute()
     
