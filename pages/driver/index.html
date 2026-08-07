@@ -252,6 +252,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module">
         import {
+            apiCall,
             updateDriverStatus, setDriverOnline, getIncomingRequestsForDriver, getDriverActiveRide, respondToRide, completeRide,
             getDriverEarnings, updateDriverLocation,
             getAvailableDeliveries, getDriverTasks, assignDelivery, updateDeliveryStatus,
@@ -357,9 +358,7 @@
 
         async function loadDriverStats() {
             try {
-                const response = await fetch(`http://localhost:8000/api/drivers/${driverId}/stats`)
-                if (!response.ok) throw new Error('Failed to fetch driver stats')
-                const data = await response.json()
+                const data = await apiCall(`/drivers/${driverId}/stats`)
                 console.log('Driver stats:', data)
 
                 document.getElementById('driverName').textContent = data.driver.name || 'Driver'
@@ -384,9 +383,7 @@
 
         async function loadCurrentTrip() {
             try {
-                const response = await fetch(`http://localhost:8000/api/drivers/${driverId}/current-trip`)
-                if (!response.ok) throw new Error('Failed to fetch current trip')
-                const data = await response.json()
+                const data = await apiCall(`/drivers/${driverId}/current-trip`)
                 console.log('Current trip:', data)
 
                 const rideAssignment = document.getElementById('ridePoolingAssignment')
